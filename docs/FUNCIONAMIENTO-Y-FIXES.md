@@ -45,6 +45,34 @@ El historial completo y actualizado se consulta con:
 git log --oneline --decorate
 ```
 
+## Commit De Integración MySway
+
+La integración completa del perfil MySway se agrupó en este commit:
+
+| Campo | Valor |
+| --- | --- |
+| Commit | `038bd63bff5f4ed89db9ec483c637255a8fc8af9` |
+| Commit corto | `038bd63` |
+| Commit anterior | `24eaa31a0df3a265731716547dba6316ffdd3695` |
+| Autor | `isgaar <may17jun2002@outlook.com>` |
+| Fecha | `2026-07-25T15:05:58-06:00` |
+| Asunto | `feat: integrate isolated MySway profile with Kitty` |
+| Resumen | `27 files changed, 1061 insertions(+), 117 deletions(-)` |
+
+El commit sustituye la configuración Sway básica incrustada por un perfil
+modular, instala Kitty como terminal principal, añade la sesión aislada de SDDM
+y empaqueta Waybar, Wofi, Mako y los scripts auxiliares. También elimina Foot y
+`swayidle` del conjunto de paquetes, mantiene el bloqueo únicamente manual y
+prohíbe Quickshell mediante validaciones automáticas.
+
+Para inspeccionarlo:
+
+```bash
+git show --stat 038bd63
+git show 038bd63
+git diff 24eaa31..038bd63
+```
+
 ## Flujo General De La Instalación
 
 La instalación se divide en dos contextos:
