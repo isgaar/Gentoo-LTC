@@ -20,6 +20,7 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Wi-Fi Intel Wi-Fi 6 AX200
 - Disco NVMe
 - Gentoo `amd64` con `systemd`
+- Nombre visible `HPGentoo`, con hostname tecnico compatible `hpgentoo`
 - Kernel compilado localmente con `sys-kernel/gentoo-kernel`
 - Root en Btrfs con LUKS
 - Dracut persistente con carga temprana de `nvme` y `amdgpu`
@@ -30,6 +31,7 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Dolphin, Konsole, Discover y Ark con soporte ZIP/7-Zip/RAR
 - Flatpak integrado con Discover, Flathub, fuentes del sistema y tema Breeze
 - Fastfetch para mostrar informacion del sistema
+- Btop para monitorizar CPU, memoria, procesos, discos y red
 - Firefox precompilado mediante `www-client/firefox-bin`
 - PipeWire + WirePlumber con ALSA, compatibilidad Pulse y RTKit
 - BlueZ habilitado para el Intel AX200, Bluedevil y audio Bluetooth
@@ -39,6 +41,7 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
 - TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`
 - Fuentes Noto, Noto CJK y Noto Color Emoji para emojis y caracteres asiaticos
+- Stem darkening de FreeType configurado para CFF y el autofitter
 - `.bashrc` preparado con rutas personales, `opencode`, `NO_AT_BRIDGE` y Bash interactivo comodo
 - Carpetas personales XDG en español para KDE, Dolphin, Firefox y Flatpak
 - Instalacion automatica al unico NVMe detectado
@@ -200,6 +203,18 @@ TIMEZONE="America/Mexico_City"
 LOCALE="es_MX.UTF-8"
 ```
 
+El nombre del sistema se define con dos valores:
+
+```bash
+HOSTNAME="hpgentoo"
+PRETTY_HOSTNAME="HPGentoo"
+```
+
+systemd exige que el hostname estatico sea una etiqueta DNS en minusculas. Por
+eso `hpgentoo` es el nombre tecnico usado por la terminal, la red y
+`hostnamectl --static`, mientras `HPGentoo` es el nombre visible que pueden
+mostrar KDE y otras interfaces mediante `hostnamectl --pretty`.
+
 Si tu contrasena de cifrado va a tener simbolos raros, conviene usar una frase larga con letras y numeros para evitar problemas de teclado en el arranque.
 
 ## Instalar
@@ -228,13 +243,13 @@ Cuando confirmes, hara en resumen:
 6. Descargar y extraer stage3 `amd64-systemd`.
 7. Configurar Portage para Ryzen 5 4500U y Radeon Vega.
 8. Compilar kernel Gentoo desde fuente.
-9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, TLP, `tlp-pd`, PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager, VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Ark y herramientas de compresion.
+9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, TLP, `tlp-pd`, PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager, VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Btop, Ark y herramientas de compresion.
 10. Crear una configuracion persistente de Dracut con soporte temprano para `amdgpu` y `nvme`.
 11. Crear entrada EFI para arrancar Gentoo y configurar GRUB UEFI con tema personalizado.
 12. Preguntar el usuario normal, pedir su contrasena y preguntar si tendra `sudo`.
 13. Crear su `.bashrc` con rutas personales, `opencode`, `NO_AT_BRIDGE`, `.bashrc.d` y completado sin distinguir mayusculas.
 14. Configurar aceleracion de video para Radeon Vega: Mesa/RadeonSI/RADV, VA-API, VDPAU, Vulkan, FFmpeg, GStreamer y mpv.
-15. Configurar fuentes Unicode para emojis y caracteres CJK.
+15. Configurar fuentes Unicode para emojis y caracteres CJK, y activar stem darkening de FreeType.
 16. Crear configuracion basica de Sway y las carpetas personales XDG en español.
 17. Corregir recursivamente el propietario de su directorio personal y habilitar `sddm`.
 18. Instalar Firefox como binario generico para evitar su compilacion local.
@@ -375,6 +390,7 @@ app-arch/unrar
 app-arch/unzip
 app-arch/zip
 app-misc/fastfetch
+sys-process/btop
 app-emulation/libvirt
 app-emulation/qemu
 app-emulation/virt-manager
@@ -408,6 +424,7 @@ Para comprobarlo despues del primer arranque:
 
 ```bash
 fastfetch
+btop --version
 flatpak remotes
 flatpak list
 flatpak list --runtime | grep org.gtk.Gtk3theme.Breeze
@@ -514,6 +531,21 @@ El perfil instala:
 Tambien crea `/etc/fonts/local.conf` con preferencias para `Noto Sans`, `Noto Serif`, `Noto Sans Mono`, variantes CJK y `Noto Color Emoji`.
 
 Esto ayuda a que KDE Plasma, Sway, terminales, navegadores y apps GTK/Qt rendericen emojis y caracteres chinos, japoneses y coreanos sin cuadros vacios.
+
+Para el rasterizado, el instalador conserva esta linea exacta en
+`/etc/environment`:
+
+```bash
+FREETYPE_PROPERTIES="cff:no-stem-darkening=0 autofitter:no-stem-darkening=0"
+```
+
+Tambien escribe el mismo valor en
+`/etc/env.d/99gentoo-hp-font-rendering` y ejecuta `env-update`. Esta segunda
+ruta es necesaria en Gentoo para generar `/etc/profile.env` y hacer que SDDM,
+Plasma y las aplicaciones iniciadas desde la sesion reciban la variable.
+`no-stem-darkening=0` activa el stem darkening para fuentes CFF y para el
+autofitter. El cambio se aplica a procesos nuevos: despues de modificarlo hay
+que cerrar sesion y volver a entrar, o reiniciar.
 
 Flatpak monta esas fuentes del anfitrión en rutas `/run/host/*-fonts`. El
 módulo `kde-gtk-config` sincroniza además la fuente de interfaz y la

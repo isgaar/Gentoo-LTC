@@ -1,7 +1,7 @@
 # Funcionamiento Y Registro De Fixes
 
 Este documento describe cómo funciona el perfil Gentoo-HP, qué problemas
-resuelven los fixes incorporados y cómo auditar el commit que los introdujo.
+resuelven los fixes incorporados y cómo auditar su historial.
 
 La configuración y el diagnóstico de PipeWire, WirePlumber y BlueZ se
 documentan por separado en [`AUDIO-Y-BLUETOOTH.md`](AUDIO-Y-BLUETOOTH.md).
@@ -10,9 +10,9 @@ QEMU/KVM, libvirt y VirtualBox se documentan en
 La sincronización visual de KDE con Flatpak se documenta en
 [`FLATPAK-DESKTOP-INTEGRATION.md`](FLATPAK-DESKTOP-INTEGRATION.md).
 
-## Commit De Los Fixes
+## Commit Base De Los Fixes
 
-Los cambios funcionales están agrupados en este commit:
+El primer lote de cambios funcionales se agrupó en este commit:
 
 | Campo | Valor |
 | --- | --- |
@@ -36,6 +36,13 @@ git show 3db2342
 git diff 1ea4e22..3db2342
 ```
 
+Las mejoras posteriores se registran en commits convencionales independientes.
+El historial completo y actualizado se consulta con:
+
+```bash
+git log --oneline --decorate
+```
+
 ## Flujo General De La Instalación
 
 La instalación se divide en dos contextos:
@@ -53,6 +60,34 @@ La instalación se divide en dos contextos:
 
 Las personalizaciones específicas están en `gentoo.conf`; el motor general de
 instalación permanece en `install` y `scripts/`.
+
+## Identidad Del Sistema
+
+systemd 260 exige que los hostnames estatico y transitorio utilicen etiquetas
+DNS formadas por ASCII en minusculas. El perfil conserva el nombre tecnico en:
+
+```text
+/etc/hostname
+hpgentoo
+```
+
+y configura el nombre visible, que si admite mayusculas, en:
+
+```text
+/etc/machine-info
+PRETTY_HOSTNAME="HPGentoo"
+```
+
+De esta manera KDE y otras interfaces compatibles pueden mostrar `HPGentoo`
+sin introducir un hostname invalido. La terminal, DNS y el prompt siguen
+utilizando `hpgentoo`. La validacion previa del instalador rechaza mayusculas
+en `HOSTNAME` cuando se usa systemd para evitar una configuracion que fallaria
+al arrancar. Se puede verificar con:
+
+```bash
+hostnamectl --static
+hostnamectl --pretty
+```
 
 ## Almacenamiento: NVMe, LUKS Y Btrfs
 
@@ -177,6 +212,7 @@ app-arch/unrar
 app-arch/unzip
 app-arch/zip
 app-misc/fastfetch
+sys-process/btop
 sys-apps/flatpak
 sys-apps/xdg-desktop-portal-gtk
 ```
@@ -215,6 +251,26 @@ preserva el aislamiento del sandbox y evita overrides globales como
 Para los colores personalizados de Breeze sí se permite únicamente
 `xdg-config/gtk-3.0:ro`. Esa ruta contiene el CSS y los recursos que genera
 `kde-gtk-config`; no concede acceso al resto del directorio personal.
+
+## Renderizado De Fuentes
+
+Ademas de instalar Noto y configurar Fontconfig, el perfil escribe:
+
+```bash
+# /etc/environment
+FREETYPE_PROPERTIES="cff:no-stem-darkening=0 autofitter:no-stem-darkening=0"
+```
+
+El mismo valor se instala en
+`/etc/env.d/99gentoo-hp-font-rendering` y se procesa con `env-update`, ya que
+las sesiones Gentoo consumen el `/etc/profile.env` generado desde `env.d`.
+Mantener `/etc/environment` tambien cubre consumidores que leen directamente
+ese archivo mediante PAM.
+
+Asignar `no-stem-darkening=0` activa el stem darkening de FreeType para CFF y
+el autofitter. Solo afecta procesos iniciados despues de recibir la variable;
+para aplicarlo a toda la sesion grafica hay que cerrar sesion y volver a entrar
+o reiniciar el equipo.
 
 ## Usuario, Permisos Y Carpetas XDG
 
@@ -275,19 +331,20 @@ La autenticación con GitHub tampoco forma parte del sistema instalado:
 - OAuth autentica la cuenta en la interfaz o herramienta local;
 - los tokens, códigos y contraseñas nunca deben añadirse al repositorio.
 
-## Archivos Modificados Por El Commit
+## Archivos Principales Del Perfil
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `install` | Configuración de Debuginfod y limpieza de la clave LUKS antes del chroot |
-| `gentoo.conf` | Paquetes, Portage, Dracut, Flatpak, XDG y propiedad del usuario |
+| `gentoo.conf` | Paquetes, identidad, FreeType, Portage, Dracut, Flatpak, XDG y propiedad del usuario |
+| `scripts/functions.sh` | Validaciones previas, incluida la restriccion de hostname para systemd |
 | `contrib/dracut/90-gentoo-hp.conf` | Configuración persistente del initramfs |
 | `contrib/bin/gentoo-hp-update-boot` | Sincronización segura del kernel y el initramfs con el ESP |
 | `contrib/kernel/postinst.d/95-gentoo-hp-esp.install` | Hook posterior a la instalación del kernel |
 | `contrib/screenshot.png` | Captura demostrativa de KDE Plasma y Fastfetch |
 | `README.md` | Uso, recuperación, paquetes y comportamiento actualizado |
 
-El resumen de Git para `3db2342` es:
+El resumen histórico de Git para el commit base `3db2342` es:
 
 ```text
 7 files changed, 458 insertions(+), 6 deletions(-)

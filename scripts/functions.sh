@@ -39,6 +39,10 @@ function check_config() {
 	local hostname_regex='^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
 	[[ $HOSTNAME =~ $hostname_regex ]] \
 		|| die "'$HOSTNAME' is not a valid hostname"
+	if [[ "$SYSTEMD" == "true" ]]; then
+		[[ "$HOSTNAME" == "${HOSTNAME,,}" ]] \
+			|| die "systemd requires a lowercase HOSTNAME; use PRETTY_HOSTNAME in /etc/machine-info for capitalization"
+	fi
 
 	[[ -v "DISK_ID_ROOT" && -n $DISK_ID_ROOT ]] \
 		|| die "You must assign DISK_ID_ROOT"
