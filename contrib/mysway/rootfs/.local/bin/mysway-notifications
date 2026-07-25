@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+action="${1:-status}"
+mode_name=do-not-disturb
+
+is_dnd() {
+    makoctl mode 2>/dev/null | grep -Fxq "$mode_name"
+}
+
+case "$action" in
+    status)
+        if is_dnd; then
+            printf '{"text":"","class":"dnd","tooltip":"No molestar activo"}\n'
+        else
+            printf '{"text":"","class":"default","tooltip":"Notificaciones activas"}\n'
+        fi
+        ;;
+    toggle)
+        makoctl mode -t "$mode_name"
+        pkill -RTMIN+8 waybar 2>/dev/null || true
+        ;;
+    clear)
+        makoctl dismiss --all
+        ;;
+    *)
+        printf 'Uso: %s {status|toggle|clear}\n' "${0##*/}" >&2
+        exit 2
+        ;;
+esac

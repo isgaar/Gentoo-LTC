@@ -17,3 +17,6 @@ function get_source_dir() {
 cd "$(get_source_dir)/.."
 shellcheck -s bash --check-sourced --external-sources ./install
 shellcheck -s bash --check-sourced --external-sources ./configure
+shellcheck -s bash ./contrib/mysway/rootfs/.config/sway/session.sh
+shellcheck -s bash ./contrib/mysway/rootfs/.local/bin/mysway-*
+shellcheck -s sh ./contrib/mysway/session/mysway-session

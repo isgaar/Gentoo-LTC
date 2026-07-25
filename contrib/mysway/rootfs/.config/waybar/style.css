@@ -1,0 +1,151 @@
+@define-color bar-bg rgba(7, 7, 8, 0.99);
+@define-color item-bg rgba(24, 24, 27, 0.98);
+@define-color item-hover rgba(39, 39, 42, 0.99);
+@define-color border rgba(255, 255, 255, 0.10);
+@define-color accent #d4d4d8;
+@define-color accent-text #09090b;
+@define-color text #f4f4f5;
+@define-color muted #a1a1aa;
+@define-color warning #e0af68;
+@define-color critical #f7768e;
+
+* {
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    font-family: "Noto Sans", "Font Awesome 6 Free";
+    font-size: 12px;
+    font-weight: 700;
+}
+
+window#waybar.mysway {
+    background: @bar-bg;
+    color: @text;
+    border: none;
+    border-bottom: 1px solid @border;
+    border-radius: 0;
+}
+
+tooltip {
+    background: rgba(15, 15, 17, 0.99);
+    color: @text;
+    border: 1px solid @border;
+    border-radius: 12px;
+}
+
+tooltip label {
+    padding: 7px;
+}
+
+#custom-launcher,
+#clock,
+#idle_inhibitor,
+#cpu,
+#memory,
+#wireplumber,
+#network,
+#backlight,
+#battery,
+#tray,
+#custom-notifications,
+#custom-power {
+    min-width: 18px;
+    padding: 0 10px;
+    margin: 5px 0;
+    background: @item-bg;
+    color: @text;
+    border: 1px solid @border;
+    border-radius: 11px;
+}
+
+#custom-launcher {
+    min-width: 16px;
+    padding: 0 8px;
+    margin-left: 3px;
+    color: @accent;
+    font-size: 14px;
+}
+
+#workspaces {
+    margin: 5px 0;
+    padding: 0 1px;
+    background: @item-bg;
+    border: 1px solid @border;
+    border-radius: 11px;
+}
+
+#workspaces button {
+    min-width: 18px;
+    padding: 0 5px;
+    color: @muted;
+    background: transparent;
+    border-radius: 8px;
+}
+
+#workspaces button.focused {
+    color: @accent-text;
+    background: @accent;
+}
+
+#workspaces button.urgent {
+    color: @accent-text;
+    background: @critical;
+}
+
+#workspaces button:hover,
+#custom-launcher:hover,
+#clock:hover,
+#idle_inhibitor:hover,
+#cpu:hover,
+#memory:hover,
+#wireplumber:hover,
+#network:hover,
+#backlight:hover,
+#battery:hover,
+#custom-notifications:hover,
+#custom-power:hover {
+    color: @text;
+    background: @item-hover;
+}
+
+#window {
+    margin-left: 8px;
+    color: @muted;
+    font-weight: 600;
+}
+
+#clock {
+    padding: 0 14px;
+}
+
+#tray {
+    padding: 0 9px;
+}
+
+#custom-power {
+    margin-right: 6px;
+    color: @critical;
+}
+
+#wireplumber.muted,
+#network.disconnected,
+#network.disabled {
+    color: @muted;
+}
+
+#battery.warning:not(.charging) {
+    color: @warning;
+}
+
+#battery.critical:not(.charging) {
+    color: @critical;
+}
+
+#idle_inhibitor.activated {
+    color: @accent-text;
+    background: @accent;
+}
+
+#custom-notifications.dnd {
+    color: @muted;
+}

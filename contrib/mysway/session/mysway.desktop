@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=MySway (aislado)
+Comment=Sway 1.11 con entorno separado de Plasma
+Exec=/usr/local/bin/mysway-session
+TryExec=/usr/local/bin/mysway-session
+Type=Application
+DesktopNames=sway;wlroots;MySway

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+choice="$(
+    printf '%s\n' \
+        'Bloquear' \
+        'Suspender' \
+        'Cerrar MySway' \
+        'Reiniciar' \
+        'Apagar' |
+        wofi --dmenu --prompt 'Sesión' --width 360 --height 320 --insensitive
+)"
+
+case "$choice" in
+    Bloquear)
+        exec swaylock -f -c 09090b
+        ;;
+    Suspender)
+        systemctl suspend
+        ;;
+    'Cerrar MySway')
+        swaymsg exit
+        ;;
+    Reiniciar)
+        systemctl reboot
+        ;;
+    Apagar)
+        systemctl poweroff
+        ;;
+esac

@@ -39,7 +39,9 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - BlueZ habilitado para el Intel AX200, Bluedevil y audio Bluetooth
 - QEMU/KVM, libvirt, Virt-Manager y VirtualBox para máquinas virtuales
 - Sway como entorno grafico Wayland
-- foot, waybar, wofi, mako, swaylock, swayidle y wl-clipboard
+- MySway modular con Kitty, Waybar, Wofi, Mako, swaylock y wl-clipboard
+- Barra negro carbón con iconos Font Awesome, sin emojis ni Quickshell
+- Bloqueo automático deshabilitado; el bloqueo manual permanece disponible
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
 - TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`
 - Fuentes Noto, Noto CJK y Noto Color Emoji para emojis y caracteres asiaticos
@@ -245,14 +247,18 @@ Cuando confirmes, hara en resumen:
 6. Descargar y extraer stage3 `amd64-systemd`.
 7. Configurar Portage para Ryzen 5 4500U y Radeon Vega.
 8. Instalar el fragmento persistente de version y compilar el kernel Gentoo desde fuente como `X.X.X-gentoo4hp-pavilion-15`.
-9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, TLP, `tlp-pd`, PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager, VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Btop, Ark y herramientas de compresion.
+9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, Kitty, TLP,
+   `tlp-pd`, PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager,
+   VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Btop, Ark y
+   herramientas de compresion.
 10. Crear una configuracion persistente de Dracut con soporte temprano para `amdgpu` y `nvme`.
 11. Crear entrada EFI para arrancar Gentoo y configurar GRUB UEFI con tema personalizado.
 12. Preguntar el usuario normal, pedir su contrasena y preguntar si tendra `sudo`.
 13. Crear su `.bashrc` con rutas personales, `opencode`, `NO_AT_BRIDGE`, `.bashrc.d` y completado sin distinguir mayusculas.
 14. Configurar aceleracion de video para Radeon Vega: Mesa/RadeonSI/RADV, VA-API, VDPAU, Vulkan, FFmpeg, GStreamer y mpv.
 15. Configurar fuentes Unicode para emojis y caracteres CJK, y activar stem darkening de FreeType.
-16. Crear configuracion basica de Sway y las carpetas personales XDG en español.
+16. Instalar el perfil modular MySway, su entrada aislada de SDDM, Kitty, Waybar,
+    Wofi y Mako, además de las carpetas personales XDG en español.
 17. Corregir recursivamente el propietario de su directorio personal y habilitar `sddm`.
 18. Instalar Firefox como binario generico para evitar su compilacion local.
 
@@ -268,16 +274,31 @@ Retira el USB o elige el disco interno desde el menu UEFI.
 
 Al arrancar Gentoo te pedira la contrasena LUKS. Despues aparecera SDDM.
 
-Inicia sesion con el usuario y la contrasena que definiste durante la instalacion. En el selector de sesion de SDDM podras elegir KDE Plasma o Sway. Si quieres el escritorio completo, elige Plasma. Si quieres un entorno ligero tipo tiling, elige Sway.
+Inicia sesion con el usuario y la contrasena que definiste durante la
+instalacion. En el selector de SDDM podras elegir KDE Plasma, la entrada Sway
+original o `MySway (aislado)`. Elige esta última para cargar el perfil completo
+sin compartir variables de sesión con Plasma.
 
-Atajos iniciales en Sway:
+Atajos iniciales en MySway:
 
-- `Super + Enter`: abrir terminal `foot`
+- `Super + Enter`: abrir terminal `kitty`
+- `Super + Shift + Enter`: abrir Kitty flotante
 - `Super + d`: abrir launcher `wofi`
-- `Super + Shift + q`: cerrar ventana
+- `Super + ←/→`: espacio de trabajo anterior o siguiente
+- `Super + q`: cerrar ventana
 - `Super + Shift + c`: recargar configuracion
 - `Super + Shift + e`: salir de Sway
-- `Print`: seleccionar region y copiar captura al portapapeles
+- `Super + Ctrl + l`: bloquear manualmente
+- `Print`: capturar todas las salidas
+- `Shift + Print`: seleccionar una región
+
+El bloqueo por inactividad no se inicia. La sesión aislada define sus variables
+en `~/.config/sway/session.sh`, registra el arranque en
+`~/.local/state/mysway/sway-session.log` y limpia únicamente su propio entorno
+al salir. No detiene ni enmascara servicios de KDE.
+
+Los archivos instalados proceden de `contrib/mysway/rootfs/`; la entrada de
+SDDM se instala como `/usr/share/wayland-sessions/mysway.desktop`.
 
 El menu de arranque sera GRUB UEFI con el tema Zorin extraido. El instalador instala el tema en:
 
@@ -560,11 +581,15 @@ mpv --hwdec=auto archivo.mp4
 
 El perfil instala:
 
+- `media-fonts/fontawesome`
 - `media-fonts/noto`
 - `media-fonts/noto-cjk`
 - `media-fonts/noto-emoji`
 
 Tambien crea `/etc/fonts/local.conf` con preferencias para `Noto Sans`, `Noto Serif`, `Noto Sans Mono`, variantes CJK y `Noto Color Emoji`.
+
+Font Awesome proporciona únicamente los iconos monocromáticos de Waybar. No
+reemplaza las preferencias tipográficas de KDE.
 
 Esto ayuda a que KDE Plasma, Sway, terminales, navegadores y apps GTK/Qt rendericen emojis y caracteres chinos, japoneses y coreanos sin cuadros vacios.
 
@@ -681,6 +706,9 @@ No se usa LVM en este layout, por lo que `vgchange -an` no es necesario.
 ## Archivos Importantes
 
 - `gentoo.conf`: perfil listo para la HP Pavilion 15-eh0xxx.
+- `contrib/mysway/rootfs`: configuración completa de MySway y sus utilidades.
+- `contrib/mysway/session`: entrada aislada de SDDM y wrapper de sesión.
+- `tests/validate-mysway.sh`: valida Kitty, Waybar, atajos y ausencia de Quickshell.
 - `contrib/dracut/90-gentoo-hp.conf`: configuracion persistente del initramfs.
 - `contrib/kernel/config.d/99-gentoo-hp-localversion.config`: nombre persistente del kernel compilado.
 - `contrib/bin/gentoo-hp-update-boot`: sincroniza kernel e initramfs con el ESP.

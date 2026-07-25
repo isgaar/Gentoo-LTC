@@ -1,0 +1,8 @@
+#!/bin/sh
+
+user_session="${XDG_CONFIG_HOME:-$HOME/.config}/sway/session.sh"
+if [ -x "$user_session" ]; then
+    exec "$user_session" "$@"
+fi
+
+exec sway "$@"

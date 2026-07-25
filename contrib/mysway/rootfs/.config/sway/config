@@ -1,0 +1,6 @@
+# MySway — Sway 1.11
+#
+# Este archivo sólo ensambla módulos. Los ajustes personales van en
+# conf.d/99-local.conf para que las actualizaciones sean fáciles de revisar.
+
+include ~/.config/sway/conf.d/*.conf

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${1:-region}"
+target_dir="${XDG_PICTURES_DIR:-$HOME/Imágenes}/Capturas de pantalla"
+mkdir -p "$target_dir"
+target="$target_dir/Captura_$(date +%Y%m%d_%H%M%S).png"
+
+case "$mode" in
+    output)
+        grim "$target"
+        ;;
+    region)
+        geometry="$(slurp)"
+        [ -n "$geometry" ] || exit 0
+        grim -g "$geometry" "$target"
+        ;;
+    window)
+        geometry="$(
+            swaymsg -t get_tree |
+                python3 -c '
+import json, sys
+tree = json.load(sys.stdin)
+stack = [tree]
+while stack:
+    node = stack.pop()
+    if node.get("focused"):
+        rect = node["rect"]
+        print(f"{rect['x']},{rect['y']} {rect['width']}x{rect['height']}")
+        break
+    stack.extend(node.get("floating_nodes", []))
+    stack.extend(node.get("nodes", []))
+'
+        )"
+        [ -n "$geometry" ] || exit 1
+        grim -g "$geometry" "$target"
+        ;;
+    *)
+        printf 'Uso: %s {output|region|window}\n' "${0##*/}" >&2
+        exit 2
+        ;;
+esac
+
+wl-copy --type image/png <"$target"
+notify-send 'Captura guardada' "$target"

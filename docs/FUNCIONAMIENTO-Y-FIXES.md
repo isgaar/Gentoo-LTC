@@ -63,6 +63,39 @@ La instalación se divide en dos contextos:
 Las personalizaciones específicas están en `gentoo.conf`; el motor general de
 instalación permanece en `install` y `scripts/`.
 
+## MySway Aislado Y Kitty
+
+El perfil gráfico completo vive en:
+
+```text
+contrib/mysway/rootfs/
+├── .config/
+│   ├── kitty/
+│   ├── mako/
+│   ├── sway/
+│   ├── waybar/
+│   └── wofi/
+└── .local/bin/
+```
+
+`configure_sway_desktop` copia este árbol al usuario final e instala
+`contrib/mysway/session/mysway-session` como wrapper de una entrada separada de
+SDDM. Las variables Wayland quedan dentro de esa sesión y no se escriben en
+`environment.d`, por lo que Plasma conserva su propio entorno.
+
+Kitty sustituye a Foot tanto en los atajos como en Wofi, la terminal flotante y
+el acceso de red desde Waybar. El instalador incluye `x11-terms/kitty` con
+soporte X/Wayland y usa `media-fonts/fontawesome` para los iconos monocromáticos
+de la barra.
+
+Los escritorios se recorren con `Super + ←/→`; el foco direccional continúa
+disponible con `Super + H/J/K/L`. Waybar utiliza botones de escritorio compactos
+para reducir el ancho del bloque izquierdo.
+
+No se instala Quickshell ni se inicia `swayidle`. El bloqueo automático queda
+deshabilitado; `swaylock` permanece instalado únicamente para la acción manual
+`Super + Ctrl + L` y el menú de sesión.
+
 ## Identidad Del Sistema
 
 systemd 260 exige que los hostnames estatico y transitorio utilicen etiquetas
@@ -382,6 +415,9 @@ La autenticación con GitHub tampoco forma parte del sistema instalado:
 | `install` | Configuración de Debuginfod y limpieza de la clave LUKS antes del chroot |
 | `gentoo.conf` | Paquetes, identidad, FreeType, Portage, Dracut, Flatpak, XDG y propiedad del usuario |
 | `scripts/functions.sh` | Validaciones previas, incluida la restriccion de hostname para systemd |
+| `contrib/mysway/rootfs/` | Perfil modular de Sway, Kitty, Waybar, Wofi y Mako instalado al usuario |
+| `contrib/mysway/session/` | Wrapper aislado y entrada de MySway para SDDM |
+| `tests/validate-mysway.sh` | Regresiones de Kitty, atajos, Waybar, bloqueo y ausencia de Quickshell |
 | `contrib/dracut/90-gentoo-hp.conf` | Configuración persistente del initramfs |
 | `contrib/kernel/config.d/99-gentoo-hp-localversion.config` | Nombre persistente del kernel compilado |
 | `contrib/bin/gentoo-hp-update-boot` | Sincronización segura del kernel y el initramfs con el ESP |
@@ -405,6 +441,7 @@ bash -n install configure gentoo.conf gentoo.conf.example \
     scripts/*.sh tests/*.sh \
     contrib/bin/gentoo-hp-update-boot \
     contrib/kernel/postinst.d/95-gentoo-hp-esp.install
+./tests/validate-mysway.sh
 git diff --check
 bash contrib/bin/gentoo-hp-update-boot --help
 grep -Fx 'CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"' \
@@ -416,6 +453,10 @@ grep -Fx '# CONFIG_LOCALVERSION_AUTO is not set' \
 También se verificó que `contrib/screenshot.png` es un PNG válido de
 1920 × 1080 y que el calculo oficial de `scripts/setlocalversion`, usando el
 valor fusionado, produce `6.18.39-gentoo4hp-pavilion-15`.
+
+El perfil MySway se comprobó además con el parser de Sway 1.11 dentro de una
+sesión real. La prueba funcional cambió del escritorio 1 al 2 y regresó al 1
+mediante `mysway-workspace`, confirmando los atajos numéricos.
 
 Estas comprobaciones validan sintaxis y consistencia estática. No sustituyen una
 instalación completa en hardware de prueba, porque el flujo real particiona el

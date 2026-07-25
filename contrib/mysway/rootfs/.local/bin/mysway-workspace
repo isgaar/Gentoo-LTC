@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+direction="${1:-}"
+case "$direction" in
+    next|prev) ;;
+    *)
+        printf 'Uso: %s {next|prev}\n' "${0##*/}" >&2
+        exit 2
+        ;;
+esac
+
+current="$(
+    swaymsg -t get_workspaces -r |
+        python3 -c '
+import json
+import sys
+
+for workspace in json.load(sys.stdin):
+    if workspace.get("focused"):
+        number = workspace.get("num", -1)
+        print(number if number > 0 else 1)
+        break
+else:
+    print(1)
+'
+)"
+
+if [[ "$direction" == next ]]; then
+    target=$((current >= 10 ? 1 : current + 1))
+else
+    target=$((current <= 1 ? 10 : current - 1))
+fi
+
+exec swaymsg workspace number "$target"

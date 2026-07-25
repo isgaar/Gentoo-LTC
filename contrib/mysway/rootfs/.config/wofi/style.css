@@ -1,0 +1,45 @@
+window {
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background-color: rgba(10, 10, 11, 0.99);
+    font-family: "Noto Sans";
+    font-size: 14px;
+}
+
+#input {
+    margin: 14px;
+    padding: 11px 14px;
+    color: #f4f4f5;
+    background-color: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+}
+
+#input:focus {
+    border-color: #a1a1aa;
+}
+
+#inner-box {
+    margin: 0 10px 12px;
+}
+
+#entry {
+    padding: 10px;
+    color: #a1a1aa;
+    border-radius: 12px;
+}
+
+#entry:selected {
+    color: #09090b;
+    background-color: #d4d4d8;
+}
+
+#img {
+    margin-right: 10px;
+}
+
+#text {
+    margin: 2px;
+}

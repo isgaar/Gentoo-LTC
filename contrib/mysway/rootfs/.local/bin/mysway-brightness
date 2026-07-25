@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+direction="${1:-}"
+if [[ "$direction" != up && "$direction" != down ]]; then
+    printf 'Uso: %s {up|down}\n' "${0##*/}" >&2
+    exit 2
+fi
+
+if command -v brightnessctl >/dev/null 2>&1; then
+    if [[ "$direction" == up ]]; then
+        exec brightnessctl set +5%
+    else
+        exec brightnessctl set 5%-
+    fi
+fi
+
+device_path=
+for candidate in /sys/class/backlight/*; do
+    if [[ -r "$candidate/brightness" && -r "$candidate/max_brightness" ]]; then
+        device_path="$candidate"
+        break
+    fi
+done
+[[ -n "$device_path" ]] || exit 0
+
+device="${device_path##*/}"
+current="$(<"$device_path/brightness")"
+maximum="$(<"$device_path/max_brightness")"
+step=$((maximum * 5 / 100))
+minimum=$((maximum / 100))
+((step > 0)) || step=1
+((minimum > 0)) || minimum=1
+
+if [[ "$direction" == up ]]; then
+    target=$((current + step))
+    ((target <= maximum)) || target="$maximum"
+else
+    target=$((current - step))
+    ((target >= minimum)) || target="$minimum"
+fi
+
+exec busctl call \
+    org.freedesktop.login1 \
+    /org/freedesktop/login1/session/auto \
+    org.freedesktop.login1.Session \
+    SetBrightness \
+    ssu \
+    backlight \
+    "$device" \
+    "$target"
