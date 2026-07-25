@@ -39,7 +39,6 @@ tooltip label {
 
 #custom-launcher,
 #idle_inhibitor,
-#cpu,
 #memory,
 #wireplumber,
 #network,
@@ -94,7 +93,6 @@ tooltip label {
 #workspaces button:hover,
 #custom-launcher:hover,
 #idle_inhibitor:hover,
-#cpu:hover,
 #memory:hover,
 #wireplumber:hover,
 #network:hover,

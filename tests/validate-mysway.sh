@@ -8,6 +8,7 @@ sway_conf="$profile/.config/sway"
 [[ -f "$sway_conf/config" ]]
 [[ -f "$profile/.config/waybar/config.jsonc" ]]
 [[ -f "$profile/.config/kitty/kitty.conf" ]]
+[[ -f "$sway_conf/conf.d/15-outputs.conf" ]]
 [[ -x "$sway_conf/session.sh" ]]
 [[ -x "$repo_dir/contrib/mysway/session/mysway-session" ]]
 [[ -x "$profile/.local/bin/mysway-clock" ]]
@@ -28,6 +29,12 @@ if grep -RInE '^[[:space:]]*exec(_always)?[[:space:]].*swayidle' "$sway_conf"; t
 fi
 
 grep -Fqx 'set $term kitty' "$sway_conf/conf.d/00-session.conf"
+grep -Fqx 'output HDMI-A-1 mode 1920x1080@75Hz position 0 0' \
+	"$sway_conf/conf.d/15-outputs.conf"
+grep -Fqx 'bindswitch --reload lid:on output eDP-1 disable' \
+	"$sway_conf/conf.d/15-outputs.conf"
+grep -Fqx 'bindswitch --reload lid:off output eDP-1 enable' \
+	"$sway_conf/conf.d/15-outputs.conf"
 grep -Fqx 'bindsym $mod+Left exec ~/.local/bin/mysway-workspace prev' \
 	"$sway_conf/conf.d/30-bindings.conf"
 grep -Fqx 'bindsym $mod+Right exec ~/.local/bin/mysway-workspace next' \
@@ -35,6 +42,9 @@ grep -Fqx 'bindsym $mod+Right exec ~/.local/bin/mysway-workspace next' \
 [[ -x "$profile/.local/bin/mysway-workspace" ]]
 grep -Fq 'x11-terms/kitty' "$repo_dir/gentoo.conf"
 grep -Fq 'media-fonts/fontawesome' "$repo_dir/gentoo.conf"
+grep -Fq 'media-fonts/jetbrains-mono' "$repo_dir/gentoo.conf"
+grep -Eq '^font_family[[:space:]]+JetBrains Mono$' \
+	"$profile/.config/kitty/kitty.conf"
 if grep -Fq 'gui-apps/foot' "$repo_dir/gentoo.conf"; then
 	printf 'Error: el instalador todavía incluye Foot.\n' >&2
 	exit 1

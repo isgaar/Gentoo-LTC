@@ -116,6 +116,16 @@ el acceso de red desde Waybar. El instalador incluye `x11-terms/kitty` con
 soporte X/Wayland y usa `media-fonts/fontawesome` para los iconos monocromáticos
 de la barra.
 
+Kitty usa `media-fonts/jetbrains-mono` y una paleta grafito cálida con acento
+ámbar. Los dieciséis colores ANSI quedan definidos en `kitty.conf`, por lo que
+editores y herramientas TUI reutilizan la misma gama sin afectar Konsole.
+
+Las ventanas en mosaico mantienen 5 px entre sí y frente a los extremos,
+incluso cuando sólo hay una ventana, mediante `smart_gaps off`. El gap exterior
+adicional queda en 0 para que no se sume al gap interior. VSCodium conserva un
+borde de 1 px pero no la barra de título de Sway, y Kitty usa una opacidad de
+0.90 sin depender de efectos exclusivos de SwayFX.
+
 Los escritorios se recorren con `Super + ←/→`; el foco direccional continúa
 disponible con `Super + H/J/K/L`. Waybar utiliza botones de escritorio compactos
 para reducir el ancho del bloque izquierdo.
@@ -129,6 +139,16 @@ de la barra para evitar una separación excesiva.
 
 El módulo de red combina iconos monocromáticos con etiquetas explícitas:
 `Wi-Fi`, `LAN` y `Sin red`, evitando glifos ambiguos.
+
+La barra no muestra un módulo de CPU; conserva únicamente la información de
+memoria y los estados de hardware que resultan útiles en el uso diario.
+
+La salida HDMI del Xiaomi `A22FAB-RAGL` se fija en el modo anunciado
+`1920x1080@75Hz`. Sway recibe directamente los eventos de `Lid Switch`: al
+cerrar la tapa deshabilita `eDP-1` y al abrirla vuelve a habilitarla. Las reglas
+usan `bindswitch --reload`, por lo que el estado físico se aplica también al
+iniciar o recargar la sesión. No se ejecuta ningún script, bucle de consulta ni
+daemon adicional, así que esta función no reserva memoria RAM permanentemente.
 
 No se instala Quickshell ni se inicia `swayidle`. El bloqueo automático queda
 deshabilitado; `swaylock` permanece instalado únicamente para la acción manual

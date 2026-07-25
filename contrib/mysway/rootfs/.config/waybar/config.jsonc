@@ -19,7 +19,6 @@
         "custom/clock"
     ],
     "modules-right": [
-        "cpu",
         "memory",
         "wireplumber",
         "network",
@@ -73,11 +72,6 @@
         },
         "tooltip-format-activated": "Suspensión automática inhibida",
         "tooltip-format-deactivated": "Suspensión automática activa"
-    },
-    "cpu": {
-        "interval": 5,
-        "format": " {usage}%",
-        "tooltip": false
     },
     "memory": {
         "interval": 5,

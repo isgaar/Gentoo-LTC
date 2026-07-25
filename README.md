@@ -41,10 +41,12 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Sway como entorno grafico Wayland
 - MySway modular con Kitty, Waybar, Wofi, Mako, swaylock y wl-clipboard
 - Interfaz negro carbón con geometría recta e iconos Font Awesome, sin emojis ni Quickshell
+- Gaps de 5 px entre ventanas y extremos, incluso con una sola ventana; VSCodium sin barra de título de Sway y Kitty al 90% de opacidad
+- Tapa gestionada por Sway sin daemon: `eDP-1` se apaga al cerrarla y el Xiaomi `A22FAB-RAGL` usa 1920x1080 a 75 Hz
 - Bloqueo automático deshabilitado; el bloqueo manual permanece disponible
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
 - TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`
-- Fuentes Noto, Noto CJK y Noto Color Emoji para emojis y caracteres asiaticos
+- JetBrains Mono para Kitty; Noto, Noto CJK y Noto Color Emoji para el resto del sistema
 - Stem darkening de FreeType configurado para CFF y el autofitter
 - `.bashrc` preparado con rutas personales, `opencode`, `NO_AT_BRIDGE` y Bash interactivo comodo
 - Carpetas personales XDG en español para KDE, Dolphin, Firefox y Flatpak
@@ -582,6 +584,7 @@ mpv --hwdec=auto archivo.mp4
 El perfil instala:
 
 - `media-fonts/fontawesome`
+- `media-fonts/jetbrains-mono`
 - `media-fonts/noto`
 - `media-fonts/noto-cjk`
 - `media-fonts/noto-emoji`
@@ -590,6 +593,9 @@ Tambien crea `/etc/fonts/local.conf` con preferencias para `Noto Sans`, `Noto Se
 
 Font Awesome proporciona únicamente los iconos monocromáticos de Waybar. No
 reemplaza las preferencias tipográficas de KDE.
+
+JetBrains Mono se aplica exclusivamente a Kitty junto con una paleta grafito
+cálida y acento ámbar; Konsole y Plasma conservan sus propias preferencias.
 
 Esto ayuda a que KDE Plasma, Sway, terminales, navegadores y apps GTK/Qt rendericen emojis y caracteres chinos, japoneses y coreanos sin cuadros vacios.
 
