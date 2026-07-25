@@ -181,6 +181,11 @@ usan `bindswitch --reload`, por lo que el estado físico se aplica también al
 iniciar o recargar la sesión. No se ejecuta ningún script, bucle de consulta ni
 daemon adicional, así que esta función no reserva memoria RAM permanentemente.
 
+El monitor DZM `FHSD20VF01` anuncia un modo de `1920x1080@100.054Hz`, que se
+selecciona mediante el identificador persistente
+`DZM FHSD20VF01 0000000000001`. La regla no depende del nombre temporal `DP-1`
+y no se aplica a otros monitores.
+
 No se instala Quickshell ni se inicia `swayidle`. El bloqueo automático queda
 deshabilitado; `swaylock` permanece instalado únicamente para la acción manual
 `Super + Ctrl + L` y el menú de sesión.

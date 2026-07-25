@@ -31,6 +31,8 @@ fi
 grep -Fqx 'set $term kitty' "$sway_conf/conf.d/00-session.conf"
 grep -Fqx 'output HDMI-A-1 mode 1920x1080@75Hz position 0 0' \
 	"$sway_conf/conf.d/15-outputs.conf"
+grep -Fqx 'output "DZM FHSD20VF01 0000000000001" mode 1920x1080@100.054Hz' \
+	"$sway_conf/conf.d/15-outputs.conf"
 grep -Fqx 'bindswitch --reload lid:on output eDP-1 disable' \
 	"$sway_conf/conf.d/15-outputs.conf"
 grep -Fqx 'bindswitch --reload lid:off output eDP-1 enable' \

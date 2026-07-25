@@ -43,6 +43,7 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Interfaz negro carbón con geometría recta e iconos Font Awesome, sin emojis ni Quickshell
 - Gaps de 5 px entre ventanas y extremos, incluso con una sola ventana; VSCodium sin barra de título de Sway y Kitty al 90% de opacidad
 - Tapa gestionada por Sway sin daemon: `eDP-1` se apaga al cerrarla y el Xiaomi `A22FAB-RAGL` usa 1920x1080 a 75 Hz
+- El monitor DZM `FHSD20VF01` usa 1920x1080 a 100.054 Hz mediante su identificador persistente
 - Bloqueo automático deshabilitado; el bloqueo manual permanece disponible
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
 - TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`
