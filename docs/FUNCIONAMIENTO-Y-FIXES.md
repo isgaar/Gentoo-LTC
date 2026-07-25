@@ -104,6 +104,33 @@ git show 31d98cc
 git diff acaa526..31d98cc
 ```
 
+## Commit Del Monitor FHSD20VF01 A 100 Hz
+
+La selección persistente del modo de alta frecuencia se agrupó en este commit:
+
+| Campo | Valor |
+| --- | --- |
+| Commit | `3c372f883ed852d6d69460c234af9d12ea7cadf1` |
+| Commit corto | `3c372f8` |
+| Commit anterior | `323fd23fe6fbb746b8fcb7fc37c4a92934d3d9d1` |
+| Autor | `isgaar <may17jun2002@outlook.com>` |
+| Fecha | `2026-07-25T16:58:49-06:00` |
+| Asunto | `feat: configure FHSD20VF01 at 100 Hz` |
+| Resumen | `5 files changed, 12 insertions(+)` |
+
+El commit configura el modo anunciado `1920x1080@100.054Hz` usando el
+identificador persistente `DZM FHSD20VF01 0000000000001`. Así, la regla no
+depende del nombre temporal `DP-1`, no afecta a otros monitores y queda cubierta
+por la validación automática de MySway.
+
+Para inspeccionarlo:
+
+```bash
+git show --stat 3c372f8
+git show 3c372f8
+git diff 323fd23..3c372f8
+```
+
 ## Flujo General De La Instalación
 
 La instalación se divide en dos contextos:
