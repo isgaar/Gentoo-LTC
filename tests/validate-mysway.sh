@@ -10,6 +10,7 @@ sway_conf="$profile/.config/sway"
 [[ -f "$profile/.config/kitty/kitty.conf" ]]
 [[ -x "$sway_conf/session.sh" ]]
 [[ -x "$repo_dir/contrib/mysway/session/mysway-session" ]]
+[[ -x "$profile/.local/bin/mysway-clock" ]]
 
 if find "$profile" -path '*/quickshell/*' -print -quit | grep -q .; then
 	printf 'Error: el perfil MySway contiene Quickshell.\n' >&2

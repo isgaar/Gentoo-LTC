@@ -2,7 +2,7 @@ window {
     margin: 0;
     padding: 0;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 18px;
+    border-radius: 0;
     background-color: rgba(10, 10, 11, 0.99);
     font-family: "Noto Sans";
     font-size: 14px;
@@ -14,7 +14,7 @@ window {
     color: #f4f4f5;
     background-color: #18181b;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 12px;
+    border-radius: 0;
 }
 
 #input:focus {
@@ -28,7 +28,7 @@ window {
 #entry {
     padding: 10px;
     color: #a1a1aa;
-    border-radius: 12px;
+    border-radius: 0;
 }
 
 #entry:selected {

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+action="${1:-status}"
+state_dir="${XDG_RUNTIME_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/mysway}"
+state_file="$state_dir/clock-mode"
+
+mkdir -p -m 0700 "$state_dir"
+
+case "$action" in
+    toggle)
+        if [[ -f "$state_file" && "$(<"$state_file")" == full ]]; then
+            printf 'compact\n' >"$state_file"
+        else
+            printf 'full\n' >"$state_file"
+        fi
+        pkill -RTMIN+9 waybar 2>/dev/null || true
+        exit 0
+        ;;
+    status) ;;
+    *)
+        printf 'Uso: %s {status|toggle}\n' "${0##*/}" >&2
+        exit 2
+        ;;
+esac
+
+days=(lunes martes miércoles jueves viernes sábado domingo)
+days_short=(lun mar mié jue vie sáb dom)
+months=(enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre)
+months_short=(ene feb mar abr may jun jul ago sep oct nov dic)
+
+day_index=$((10#$(date +%u) - 1))
+month_index=$((10#$(date +%m) - 1))
+day_number="$(date +%-d)"
+year="$(date +%Y)"
+time="$(date +%H:%M)"
+full_text="${days[$day_index]}, $day_number de ${months[$month_index]} de $year"
+
+if [[ -f "$state_file" && "$(<"$state_file")" == full ]]; then
+    text="$full_text"
+else
+    text="${days_short[$day_index]} $day_number ${months_short[$month_index]}  $time"
+fi
+
+printf '{"text":"%s","tooltip":"%s"}\n' "$text" "$full_text"

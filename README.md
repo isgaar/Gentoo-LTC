@@ -40,7 +40,7 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - QEMU/KVM, libvirt, Virt-Manager y VirtualBox para máquinas virtuales
 - Sway como entorno grafico Wayland
 - MySway modular con Kitty, Waybar, Wofi, Mako, swaylock y wl-clipboard
-- Barra negro carbón con iconos Font Awesome, sin emojis ni Quickshell
+- Interfaz negro carbón con geometría recta e iconos Font Awesome, sin emojis ni Quickshell
 - Bloqueo automático deshabilitado; el bloqueo manual permanece disponible
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
 - TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`

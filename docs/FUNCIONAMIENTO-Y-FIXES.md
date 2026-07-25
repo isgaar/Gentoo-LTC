@@ -120,6 +120,16 @@ Los escritorios se recorren con `Super + ←/→`; el foco direccional continúa
 disponible con `Super + H/J/K/L`. Waybar utiliza botones de escritorio compactos
 para reducir el ancho del bloque izquierdo.
 
+Waybar, sus tooltips, Wofi y Mako usan esquinas rectas (`border-radius: 0`) para
+mantener una geometría uniforme en toda la sesión.
+
+El reloj central usa un formateador español explícito, sin depender del locale
+interpretado por Waybar ni mostrar un recuadro. Mako se ancla dos píxeles debajo
+de la barra para evitar una separación excesiva.
+
+El módulo de red combina iconos monocromáticos con etiquetas explícitas:
+`Wi-Fi`, `LAN` y `Sin red`, evitando glifos ambiguos.
+
 No se instala Quickshell ni se inicia `swayidle`. El bloqueo automático queda
 deshabilitado; `swaylock` permanece instalado únicamente para la acción manual
 `Super + Ctrl + L` y el menú de sesión.

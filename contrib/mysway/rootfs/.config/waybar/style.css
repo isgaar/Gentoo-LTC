@@ -30,7 +30,7 @@ tooltip {
     background: rgba(15, 15, 17, 0.99);
     color: @text;
     border: 1px solid @border;
-    border-radius: 12px;
+    border-radius: 0;
 }
 
 tooltip label {
@@ -38,7 +38,6 @@ tooltip label {
 }
 
 #custom-launcher,
-#clock,
 #idle_inhibitor,
 #cpu,
 #memory,
@@ -55,7 +54,7 @@ tooltip label {
     background: @item-bg;
     color: @text;
     border: 1px solid @border;
-    border-radius: 11px;
+    border-radius: 0;
 }
 
 #custom-launcher {
@@ -71,7 +70,7 @@ tooltip label {
     padding: 0 1px;
     background: @item-bg;
     border: 1px solid @border;
-    border-radius: 11px;
+    border-radius: 0;
 }
 
 #workspaces button {
@@ -79,7 +78,7 @@ tooltip label {
     padding: 0 5px;
     color: @muted;
     background: transparent;
-    border-radius: 8px;
+    border-radius: 0;
 }
 
 #workspaces button.focused {
@@ -94,7 +93,6 @@ tooltip label {
 
 #workspaces button:hover,
 #custom-launcher:hover,
-#clock:hover,
 #idle_inhibitor:hover,
 #cpu:hover,
 #memory:hover,
@@ -114,8 +112,18 @@ tooltip label {
     font-weight: 600;
 }
 
-#clock {
+#custom-clock {
+    min-width: 0;
     padding: 0 14px;
+    margin: 0;
+    color: @text;
+    background: transparent;
+    border: none;
+}
+
+#custom-clock:hover {
+    color: @muted;
+    background: transparent;
 }
 
 #tray {
