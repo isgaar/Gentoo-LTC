@@ -18,6 +18,30 @@ function find_latest_kernel() {
 		| tail -n 1
 }
 
+function find_selected_kernel() {
+	local source_path
+	local source_version
+	local candidate
+
+	source_path="$(readlink -f /usr/src/linux 2>/dev/null)" \
+		|| return 1
+	source_version="${source_path##*/}"
+	[[ "$source_version" == linux-* ]] \
+		|| return 1
+	source_version="${source_version#linux-}"
+
+	for candidate in "/boot/vmlinuz-$source_version" "/boot/kernel-$source_version"; do
+		[[ -r "$candidate" ]] \
+			&& { echo -n "$candidate"; return 0; }
+	done
+	return 1
+}
+
+function find_default_kernel() {
+	find_selected_kernel \
+		|| find_latest_kernel
+}
+
 function kernel_version_from_path() {
 	local name
 	name="$(basename "$1")"
@@ -47,8 +71,9 @@ function usage() {
 Usage: gentoo-hp-update-boot [KERNEL_VERSION [KERNEL_IMAGE]]
 
 Copies the selected kernel and its initramfs to the fixed paths used by the
-Gentoo-HP GRUB menu. Without arguments, the newest versioned kernel in /boot
-is selected. If no matching initramfs exists, one is generated with Dracut.
+Gentoo-HP GRUB menu. Without arguments, the kernel selected by /usr/src/linux
+is preferred, falling back to the newest versioned kernel in /boot. If no
+matching initramfs exists, one is generated with Dracut.
 EOF
 }
 
@@ -78,10 +103,12 @@ if [[ -z "$kernel_image" && -n "$kernel_version" ]]; then
 			break
 		fi
 	done
+	[[ -n "$kernel_image" ]] \
+		|| die "could not find a kernel image for version '$kernel_version'"
 fi
 
 if [[ -z "$kernel_image" ]]; then
-	kernel_image="$(find_latest_kernel)" \
+	kernel_image="$(find_default_kernel)" \
 		|| die "could not search for kernels in /boot"
 fi
 [[ -n "$kernel_image" && -r "$kernel_image" ]] \

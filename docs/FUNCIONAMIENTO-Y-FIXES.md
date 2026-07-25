@@ -7,6 +7,8 @@ La configuración y el diagnóstico de PipeWire, WirePlumber y BlueZ se
 documentan por separado en [`AUDIO-Y-BLUETOOTH.md`](AUDIO-Y-BLUETOOTH.md).
 QEMU/KVM, libvirt y VirtualBox se documentan en
 [`VIRTUALIZATION.md`](VIRTUALIZATION.md).
+El nombre persistente del kernel se documenta en
+[`KERNEL-PERSONALIZADO.md`](KERNEL-PERSONALIZADO.md).
 La sincronización visual de KDE con Flatpak se documenta en
 [`FLATPAK-DESKTOP-INTEGRATION.md`](FLATPAK-DESKTOP-INTEGRATION.md).
 
@@ -151,21 +153,59 @@ No depende de `/boot/grub/grub.cfg`. Por ese motivo, ejecutar solamente
 `grub-mkconfig -o /boot/grub/grub.cfg` no actualiza el menú utilizado por este
 perfil.
 
+### Nombre Persistente Del Kernel
+
+Antes de compilar `sys-kernel/gentoo-kernel`, el perfil instala:
+
+```text
+/etc/kernel/config.d/99-gentoo-hp-localversion.config
+```
+
+con:
+
+```text
+CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"
+# CONFIG_LOCALVERSION_AUTO is not set
+```
+
+El ebuild propone primero `CONFIG_LOCALVERSION="-gentoo-dist"`, pero
+`kernel-build.eclass` fusiona los fragmentos de `/etc/kernel/config.d` al
+final. El valor del perfil lo sustituye y produce:
+
+```text
+X.X.X-gentoo4hp-pavilion-15
+```
+
+La version completa se utiliza de forma coherente en `/usr/src/linux-*`,
+`/lib/modules/*`, la imagen de `/boot` y Dracut. Desactivar
+`CONFIG_LOCALVERSION_AUTO` evita sufijos adicionales basados en el repositorio
+Git de las fuentes.
+
+Este mecanismo solamente es valido para `KERNEL_TYPE=source`. Un kernel binario
+ya contiene una version interna y no puede personalizarse renombrando sus
+archivos. El procedimiento para instalaciones existentes y las comprobaciones
+posteriores se detallan en
+[`KERNEL-PERSONALIZADO.md`](KERNEL-PERSONALIZADO.md).
+
 ### Actualización Automática Del Kernel
 
 El commit agrega:
 
 ```text
 /usr/local/sbin/gentoo-hp-update-boot
+/etc/kernel/install.d/95-gentoo-hp-esp.install
 /etc/kernel/postinst.d/95-gentoo-hp-esp.install
 ```
 
-Cuando `sys-kernel/gentoo-kernel` instala un kernel, el hook llama al
-actualizador. El actualizador:
+Con `installkernel[systemd]`, `kernel-install` ejecuta el plugin de
+`/etc/kernel/install.d`. La copia de `/etc/kernel/postinst.d` cubre el flujo
+tradicional cuando systemd no realiza la instalacion. En ambos casos el hook
+llama al actualizador cuando `sys-kernel/gentoo-kernel` instala un kernel. El
+actualizador:
 
 1. comprueba que se ejecuta como `root`;
 2. comprueba que `/boot/efi` está montado;
-3. localiza el kernel y su versión;
+3. prioriza el kernel seleccionado por `/usr/src/linux` y determina su versión;
 4. reutiliza el initramfs correspondiente o lo genera con Dracut;
 5. prepara archivos temporales dentro del ESP;
 6. reemplaza los nombres estables solamente cuando ambos archivos están listos;
@@ -187,7 +227,11 @@ KERNEL_TYPE=source
 ```
 
 Por tanto, Portage compila normalmente el kernel, Mesa, LLVM, systemd, KDE
-Plasma, Sway, TLP y PipeWire. Firefox es la excepción deliberada:
+Plasma, Sway, TLP y PipeWire. El kernel compilado conserva el sufijo
+`-gentoo4hp-pavilion-15` en cada actualizacion gracias al fragmento de
+`/etc/kernel/config.d`.
+
+Firefox es la excepción deliberada:
 
 ```text
 www-client/firefox-bin
@@ -339,9 +383,11 @@ La autenticación con GitHub tampoco forma parte del sistema instalado:
 | `gentoo.conf` | Paquetes, identidad, FreeType, Portage, Dracut, Flatpak, XDG y propiedad del usuario |
 | `scripts/functions.sh` | Validaciones previas, incluida la restriccion de hostname para systemd |
 | `contrib/dracut/90-gentoo-hp.conf` | Configuración persistente del initramfs |
+| `contrib/kernel/config.d/99-gentoo-hp-localversion.config` | Nombre persistente del kernel compilado |
 | `contrib/bin/gentoo-hp-update-boot` | Sincronización segura del kernel y el initramfs con el ESP |
-| `contrib/kernel/postinst.d/95-gentoo-hp-esp.install` | Hook posterior a la instalación del kernel |
+| `contrib/kernel/postinst.d/95-gentoo-hp-esp.install` | Hook compatible con systemd kernel-install e installkernel tradicional |
 | `contrib/screenshot.png` | Captura demostrativa de KDE Plasma y Fastfetch |
+| `docs/KERNEL-PERSONALIZADO.md` | Instalacion, migracion y verificacion del nombre del kernel |
 | `README.md` | Uso, recuperación, paquetes y comportamiento actualizado |
 
 El resumen histórico de Git para el commit base `3db2342` es:
@@ -361,10 +407,15 @@ bash -n install configure gentoo.conf gentoo.conf.example \
     contrib/kernel/postinst.d/95-gentoo-hp-esp.install
 git diff --check
 bash contrib/bin/gentoo-hp-update-boot --help
+grep -Fx 'CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"' \
+    contrib/kernel/config.d/99-gentoo-hp-localversion.config
+grep -Fx '# CONFIG_LOCALVERSION_AUTO is not set' \
+    contrib/kernel/config.d/99-gentoo-hp-localversion.config
 ```
 
 También se verificó que `contrib/screenshot.png` es un PNG válido de
-1920 × 1080.
+1920 × 1080 y que el calculo oficial de `scripts/setlocalversion`, usando el
+valor fusionado, produce `6.18.39-gentoo4hp-pavilion-15`.
 
 Estas comprobaciones validan sintaxis y consistencia estática. No sustituyen una
 instalación completa en hardware de prueba, porque el flujo real particiona el

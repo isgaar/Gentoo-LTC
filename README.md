@@ -12,6 +12,8 @@ La pila multimedia y su diagnóstico están explicados en
 [`docs/AUDIO-Y-BLUETOOTH.md`](docs/AUDIO-Y-BLUETOOTH.md).
 La virtualización se documenta en
 [`docs/VIRTUALIZATION.md`](docs/VIRTUALIZATION.md).
+El nombre persistente del kernel y su mantenimiento se documentan en
+[`docs/KERNEL-PERSONALIZADO.md`](docs/KERNEL-PERSONALIZADO.md).
 La integración de fuentes y temas entre KDE y Flatpak se documenta en
 [`docs/FLATPAK-DESKTOP-INTEGRATION.md`](docs/FLATPAK-DESKTOP-INTEGRATION.md).
 
@@ -21,7 +23,7 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Disco NVMe
 - Gentoo `amd64` con `systemd`
 - Nombre visible `HPGentoo`, con hostname tecnico compatible `hpgentoo`
-- Kernel compilado localmente con `sys-kernel/gentoo-kernel`
+- Kernel compilado localmente con `sys-kernel/gentoo-kernel` e identificado como `X.X.X-gentoo4hp-pavilion-15`
 - Root en Btrfs con LUKS
 - Dracut persistente con carga temprana de `nvme` y `amdgpu`
 - NetworkManager + iwd para Wi-Fi
@@ -242,7 +244,7 @@ Cuando confirmes, hara en resumen:
 5. Crear root Btrfs cifrado con LUKS.
 6. Descargar y extraer stage3 `amd64-systemd`.
 7. Configurar Portage para Ryzen 5 4500U y Radeon Vega.
-8. Compilar kernel Gentoo desde fuente.
+8. Instalar el fragmento persistente de version y compilar el kernel Gentoo desde fuente como `X.X.X-gentoo4hp-pavilion-15`.
 9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, TLP, `tlp-pd`, PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager, VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Btop, Ark y herramientas de compresion.
 10. Crear una configuracion persistente de Dracut con soporte temprano para `amdgpu` y `nvme`.
 11. Crear entrada EFI para arrancar Gentoo y configurar GRUB UEFI con tema personalizado.
@@ -301,14 +303,48 @@ Tambien instala:
 
 ```text
 /etc/dracut.conf.d/90-gentoo-hp.conf
+/etc/kernel/config.d/99-gentoo-hp-localversion.config
+/etc/kernel/install.d/95-gentoo-hp-esp.install
 /usr/local/sbin/gentoo-hp-update-boot
 /etc/kernel/postinst.d/95-gentoo-hp-esp.install
 ```
 
-El hook actualiza automaticamente los dos archivos del ESP cuando `sys-kernel/gentoo-kernel` instala una version nueva. Para repetir la sincronizacion manualmente:
+El fragmento de `/etc/kernel/config.d` sustituye el `-gentoo-dist`
+predeterminado antes de compilar. Por ejemplo, Linux 6.18.39 queda identificado
+como:
+
+```text
+6.18.39-gentoo4hp-pavilion-15
+```
+
+También desactiva `CONFIG_LOCALVERSION_AUTO`, por lo que no se agregan sufijos
+de Git. El nombre se conserva en futuras actualizaciones de
+`sys-kernel/gentoo-kernel`; kernel, modulos e initramfs comparten siempre la
+misma version completa.
+
+El hook de `/etc/kernel/install.d` cubre el flujo actual de systemd y la copia
+en `/etc/kernel/postinst.d` conserva compatibilidad con installkernel
+tradicional. Ambos actualizan automaticamente los dos archivos del ESP cuando
+`sys-kernel/gentoo-kernel` instala una version nueva. Para repetir la
+sincronizacion manualmente:
 
 ```bash
 sudo gentoo-hp-update-boot
+```
+
+Sin argumentos, el actualizador prioriza el kernel señalado por
+`/usr/src/linux` y solo recurre al archivo versionado más reciente si ese
+enlace no tiene una imagen correspondiente. Esto evita escoger por accidente
+un kernel antiguo `-gentoo-dist` con la misma version numerica.
+
+Despues de arrancar el kernel nuevo, `uname -r` y Fastfetch deben mostrar
+`X.X.X-gentoo4hp-pavilion-15`. La explicacion y el procedimiento para una
+instalacion existente estan en
+[`docs/KERNEL-PERSONALIZADO.md`](docs/KERNEL-PERSONALIZADO.md).
+
+```bash
+uname -r
+fastfetch
 ```
 
 No uses `grub-mkconfig -o /boot/grub/grub.cfg` para este perfil: GRUB se instala en el ESP y carga `/boot/efi/grub/grub.cfg`, que apunta deliberadamente a los nombres fijos anteriores.
@@ -646,6 +682,7 @@ No se usa LVM en este layout, por lo que `vgchange -an` no es necesario.
 
 - `gentoo.conf`: perfil listo para la HP Pavilion 15-eh0xxx.
 - `contrib/dracut/90-gentoo-hp.conf`: configuracion persistente del initramfs.
+- `contrib/kernel/config.d/99-gentoo-hp-localversion.config`: nombre persistente del kernel compilado.
 - `contrib/bin/gentoo-hp-update-boot`: sincroniza kernel e initramfs con el ESP.
 - `contrib/kernel/postinst.d/95-gentoo-hp-esp.install`: automatiza esa sincronizacion al actualizar el kernel.
 - `contrib/grub/themes/gentoo-hp-zorin`: tema GRUB extraido desde `zoringrub`.
@@ -656,6 +693,7 @@ No se usa LVM en este layout, por lo que `vgchange -an` no es necesario.
 - `docs/AUDIO-Y-BLUETOOTH.md`: funcionamiento, diagnóstico y reparación de audio/Bluetooth.
 - `docs/FUNCIONAMIENTO-Y-FIXES.md`: arquitectura y registro del commit de fixes.
 - `docs/FLATPAK-DESKTOP-INTEGRATION.md`: fuentes, Breeze, portales y verificación con Brave Flatpak.
+- `docs/KERNEL-PERSONALIZADO.md`: nombre del kernel, recompilacion y actualizaciones persistentes.
 - `docs/VIRTUALIZATION.md`: uso y diagnóstico de QEMU/KVM, libvirt y VirtualBox.
 - `gentoo.conf.example`: ejemplo general con las variables nuevas de Portage.
 - `scripts/main.sh`: aplica las optimizaciones de hardware durante la instalacion.
