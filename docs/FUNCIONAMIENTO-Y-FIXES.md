@@ -73,6 +73,37 @@ git show 038bd63
 git diff 24eaa31..038bd63
 ```
 
+## Commit De Refinamiento Visual Y Pantallas
+
+La personalización visual y la gestión eficiente de las pantallas se agruparon
+en este commit:
+
+| Campo | Valor |
+| --- | --- |
+| Commit | `31d98cc189206d49e2f1e7bb084191ca72c76e18` |
+| Commit corto | `31d98cc` |
+| Commit anterior | `acaa5265669624ec02872d24f5d868dbd0d04047` |
+| Autor | `isgaar <may17jun2002@outlook.com>` |
+| Fecha | `2026-07-25T16:53:55-06:00` |
+| Asunto | `feat: refine MySway visuals and display handling` |
+| Resumen | `11 files changed, 91 insertions(+), 27 deletions(-)` |
+
+El commit aplica JetBrains Mono, una paleta grafito cálida y transparencia a
+Kitty; elimina el módulo de CPU de Waybar; oculta la barra de título de
+VSCodium; y mantiene separaciones uniformes de 5 px. También usa el interruptor
+nativo de la tapa para desactivar `eDP-1` al cerrarla y fija el Xiaomi
+`A22FAB-RAGL` en `1920x1080@75Hz`, sin añadir procesos residentes. Las
+validaciones automáticas comprueban la fuente, las reglas de salida y la gestión
+de la tapa.
+
+Para inspeccionarlo:
+
+```bash
+git show --stat 31d98cc
+git show 31d98cc
+git diff acaa526..31d98cc
+```
+
 ## Flujo General De La Instalación
 
 La instalación se divide en dos contextos:
