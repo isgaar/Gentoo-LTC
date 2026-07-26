@@ -1,0 +1,9 @@
+[Plugins]
+magiclampEnabled=true
+squashEnabled=false
+
+[Xwayland]
+Scale=1
+
+[org.kde.kdecoration2]
+ButtonsOnRight=IAX

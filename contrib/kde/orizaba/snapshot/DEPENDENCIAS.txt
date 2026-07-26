@@ -1,0 +1,34 @@
+[Tema global]
+LookAndFeelPackage=Orizaba
+PlasmaTheme=default
+ColorScheme=Orizaba
+Icons=breeze-dark
+Cursor=breeze_cursors
+WidgetStyle=Breeze
+
+[Widgets requeridos]
+org.kde.kscreen
+org.kde.panel
+org.kde.plasma.battery
+org.kde.plasma.bluetooth
+org.kde.plasma.brightness
+org.kde.plasma.cameraindicator
+org.kde.plasma.clipboard
+org.kde.plasma.devicenotifier
+org.kde.plasma.digitalclock
+org.kde.plasma.folder
+org.kde.plasma.icontasks
+org.kde.plasma.keyboardindicator
+org.kde.plasma.keyboardlayout
+org.kde.plasma.kickoff
+org.kde.plasma.manage-inputmethod
+org.kde.plasma.marginsseparator
+org.kde.plasma.mediacontroller
+org.kde.plasma.networkmanagement
+org.kde.plasma.notifications
+org.kde.plasma.pager
+org.kde.plasma.showdesktop
+org.kde.plasma.systemtray
+org.kde.plasma.vault
+org.kde.plasma.volume
+org.kde.plasma.weather

@@ -1,0 +1,9 @@
+Perfil: Gentoo-HP KDE Orizaba
+Origen: MyKdeCustom/kde_backup
+Repositorio de origen: https://github.com/isgaar/MyKdeCustom.git
+Commit de origen: 5d0d0d235afaf6b3bf07719039ce018a2d74b67d
+Plasma de origen: 6.6.6
+Tipo: snapshot portable y saneado
+
+El perfil conserva apariencia, panel, fondo, atajos, integración GTK,
+Konsole y asociaciones compatibles con firefox-bin.

@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Ismael"
+            }
+        ],
+        "Category": "Desktop",
+        "Description": "Tema y diseño personal de KDE Plasma",
+        "Id": "Orizaba",
+        "License": "Custom",
+        "Name": "Orizaba",
+        "Version": "2026.07.25"
+    },
+    "Keywords": "Desktop;Workspace;Appearance;Look and Feel;Orizaba;",
+    "X-Plasma-APIVersion": "2",
+    "X-Plasma-MainScript": "default"
+}

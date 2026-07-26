@@ -9,6 +9,8 @@ QEMU/KVM, libvirt y VirtualBox se documentan en
 [`VIRTUALIZATION.md`](VIRTUALIZATION.md).
 El nombre persistente del kernel se documenta en
 [`KERNEL-PERSONALIZADO.md`](KERNEL-PERSONALIZADO.md).
+El perfil KDE Orizaba y sus fuentes se documentan en
+[`KDE-PERSONALIZADO.md`](KDE-PERSONALIZADO.md).
 La sincronización visual de KDE con Flatpak se documenta en
 [`FLATPAK-DESKTOP-INTEGRATION.md`](FLATPAK-DESKTOP-INTEGRATION.md).
 
@@ -43,6 +45,26 @@ El historial completo y actualizado se consulta con:
 
 ```bash
 git log --oneline --decorate
+```
+
+## Commit De Integración KDE Orizaba
+
+La integración de `MyKdeCustom` y las fuentes de `kdevoid` se prepara con este
+asunto convencional:
+
+```text
+feat: integrate portable Orizaba KDE profile
+```
+
+El commit incluye las fuentes Inter globales, el snapshot portable y saneado,
+el importador con rollback, la aplicación idempotente durante la primera sesión
+Plasma, el saneado de audio/Bluetooth/pantallas, el mapa de licencias, las
+pruebas de integridad y esta documentación. Su identificador local se consulta
+sin depender de que ya se haya publicado:
+
+```bash
+git log -1 --format='%H%n%an <%ae>%n%aI%n%s'
+git show --stat --oneline HEAD
 ```
 
 ## Commit De Integración MySway
@@ -418,8 +440,105 @@ sys-apps/xdg-desktop-portal-gtk
 Ark recibe soporte ZIP y se acepta de forma específica la licencia necesaria
 para `app-arch/unrar`.
 
-Sway conserva su configuración inicial con teclado `latam`, touchpad, Waybar,
-Wofi, Mako, bloqueo de pantalla y atajos básicos.
+### Perfil KDE Orizaba
+
+Antes de aplicar KDE, el instalador coloca las 36 variantes de Inter e Inter
+Display procedentes de `kdevoid/Fonts` en:
+
+```text
+/usr/local/share/fonts/gentoo-hp/inter/
+```
+
+JetBrains Mono y JetBrains Mono NL no se duplican desde el respaldo:
+`media-fonts/jetbrains-mono` las instala mediante Portage. Fontconfig reconstruye
+su caché antes de que el perfil seleccione Inter como fuente general, Inter
+Display para menús y títulos, y JetBrains Mono NL para texto de ancho fijo.
+
+El snapshot saneado procede de `MyKdeCustom/kde_backup`, fue extraído desde
+Plasma 6.6.6 y se instala como recurso de solo lectura en:
+
+```text
+/usr/local/share/gentoo-hp/kde/orizaba/
+```
+
+El importador queda disponible en:
+
+```text
+/usr/local/bin/gentoo-hp-apply-kde
+```
+
+Durante el chroot, `configure_kde_desktop` lo ejecuta mediante `runuser`, con el
+`HOME` y las rutas XDG del usuario final, y añade `--no-restart`. No intenta
+contactar una sesión Plasma inexistente. También instala un autostart exclusivo
+de KDE que, dentro de la primera sesión real, ejecuta:
+
+```bash
+plasma-apply-lookandfeel --apply Orizaba --resetLayout
+plasma-apply-wallpaperimage --fill-mode preserveAspectCrop <fondo-Path>
+```
+
+Esto evita depender de que Plasma interprete un `appletsrc` copiado desde el
+chroot y aplica de forma efectiva el panel, los widgets, la altura, la
+flotación, el esquema Orizaba y el fondo. El perfil de Konsole queda seleccionado
+explícitamente como predeterminado.
+
+`SHA256SUMS` protege la integridad del snapshot y de las fuentes. El instalador
+exige que cada manifiesto cubra exactamente todos los archivos y después usa
+`sha256sum --check --strict`; los extras no declarados también abortan. Además,
+guarda el digest del manifiesto KDE en
+`~/.local/state/gentoo-hp/kde-profile.sha256`: si no cambia, omite la
+reimportación y conserva las modificaciones posteriores del usuario. Cada
+importación efectiva crea un respaldo bajo
+`~/.local/state/gentoo-hp/kde-restore/`.
+
+La primera sesión registra por separado
+`~/.local/state/gentoo-hp/kde-first-login.sha256`. Solo vuelve a aplicar el
+layout cuando cambia el perfil o se ejecuta manualmente el importador.
+Ambos marcadores se escriben o reemplazan atómicamente desde el proceso del
+usuario; el instalador con privilegios no redirige escrituras dentro de ese
+directorio controlado por el usuario.
+
+El saneado excluye los estados específicos de Bluetooth
+(`bluedevilglobalrc`), audio (`plasmaparc`), pantallas
+(`kwinoutputconfig.json` y KScreen), energía y bloqueo, y restauración de
+sesión. También excluye credenciales, KDE Wallet, cachés y archivos efímeros.
+Así PipeWire, WirePlumber, BlueZ, KScreen y PowerDevil detectan el hardware
+actual en vez de heredar identificadores del equipo de origen.
+
+Las rutas del usuario y del fondo se reescriben durante la importación para
+hacer portable el perfil. Plasma puede migrar valores cuando cambie de versión;
+la procedencia 6.6.6 no implica fijar Plasma a esa versión.
+
+El snapshot tampoco fuerza un KSplash inexistente ni redistribuye decoraciones
+GTK generadas por Breeze. `kde-plasma/kde-gtk-config` genera esas decoraciones
+para la versión instalada. Orizaba incluye un mapa de licencias: configuración
+original MIT, fondo Path LGPLv3 y logotipo Gentoo CC BY-SA 2.5.
+
+La reaplicación manual se realiza como usuario, sin `sudo`:
+
+```bash
+gentoo-hp-apply-kde
+```
+
+Después hay que cerrar la sesión y volver a entrar para que el autostart
+idempotente reconstruya el layout.
+
+Desde una TTY o un chroot se usa:
+
+```bash
+gentoo-hp-apply-kde --no-restart
+```
+
+Para omitir Orizaba en una instalación nueva:
+
+```bash
+INSTALL_KDE_CUSTOM_PROFILE=false
+```
+
+La variable no desinstala KDE ni las fuentes globales. El procedimiento de
+reversión, las limitaciones del respaldo, las comprobaciones y la descripción
+completa del snapshot están en
+[`KDE-PERSONALIZADO.md`](KDE-PERSONALIZADO.md).
 
 ## Flatpak Y Discover
 
@@ -539,11 +658,17 @@ La autenticación con GitHub tampoco forma parte del sistema instalado:
 | `contrib/mysway/rootfs/` | Perfil modular de Sway, Kitty, Waybar, Wofi y Mako instalado al usuario |
 | `contrib/mysway/session/` | Wrapper aislado y entrada de MySway para SDDM |
 | `tests/validate-mysway.sh` | Regresiones de Kitty, atajos, Waybar, bloqueo y ausencia de Quickshell |
+| `contrib/fonts/inter/` | Inter e Inter Display instaladas globalmente antes de aplicar KDE |
+| `contrib/kde/orizaba/snapshot/` | Perfil KDE Orizaba portable, saneado y protegido por sumas SHA-256 |
+| `contrib/kde/orizaba/import_kde.sh` | Importador con respaldo, validación de integridad y reinicio opcional de Plasma |
+| `contrib/kde/orizaba/first_login.sh` | Aplicador idempotente del layout y fondo dentro de una sesión Plasma |
+| `tests/validate-kde-profile.sh` | Integridad exacta, fuentes, exclusiones, enlaces, primer inicio e importación en un HOME temporal |
 | `contrib/dracut/90-gentoo-hp.conf` | Configuración persistente del initramfs |
 | `contrib/kernel/config.d/99-gentoo-hp-localversion.config` | Nombre persistente del kernel compilado |
 | `contrib/bin/gentoo-hp-update-boot` | Sincronización segura del kernel y el initramfs con el ESP |
 | `contrib/kernel/postinst.d/95-gentoo-hp-esp.install` | Hook compatible con systemd kernel-install e installkernel tradicional |
 | `contrib/screenshot.png` | Captura demostrativa de KDE Plasma y Fastfetch |
+| `docs/KDE-PERSONALIZADO.md` | Instalación, idempotencia, reaplicación y reversión del perfil Orizaba |
 | `docs/KERNEL-PERSONALIZADO.md` | Instalacion, migracion y verificacion del nombre del kernel |
 | `README.md` | Uso, recuperación, paquetes y comportamiento actualizado |
 
@@ -561,10 +686,21 @@ Antes de crear el commit se ejecutaron:
 bash -n install configure gentoo.conf gentoo.conf.example \
     scripts/*.sh tests/*.sh \
     contrib/bin/gentoo-hp-update-boot \
-    contrib/kernel/postinst.d/95-gentoo-hp-esp.install
+    contrib/kernel/postinst.d/95-gentoo-hp-esp.install \
+    contrib/kde/orizaba/import_kde.sh \
+    contrib/kde/orizaba/first_login.sh
 ./tests/validate-mysway.sh
+./tests/validate-kde-profile.sh
 git diff --check
 bash contrib/bin/gentoo-hp-update-boot --help
+(cd contrib/kde/orizaba/snapshot && sha256sum --check --strict SHA256SUMS)
+(cd contrib/fonts/inter && sha256sum --check --strict SHA256SUMS)
+desktop-file-validate \
+    contrib/kde/orizaba/gentoo-hp-kde-first-login.desktop
+node --check \
+    contrib/kde/orizaba/snapshot/Orizaba/contents/layouts/org.kde.plasma.desktop-layout.js
+test "$(find contrib/fonts/inter -maxdepth 1 -type f \
+    -name 'Inter*.ttf' | wc -l)" -eq 36
 grep -Fx 'CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"' \
     contrib/kernel/config.d/99-gentoo-hp-localversion.config
 grep -Fx '# CONFIG_LOCALVERSION_AUTO is not set' \
@@ -579,9 +715,15 @@ El perfil MySway se comprobó además con el parser de Sway 1.11 dentro de una
 sesión real. La prueba funcional cambió del escritorio 1 al 2 y regresó al 1
 mediante `mysway-workspace`, confirmando los atajos numéricos.
 
-Estas comprobaciones validan sintaxis y consistencia estática. No sustituyen una
-instalación completa en hardware de prueba, porque el flujo real particiona el
-disco seleccionado.
+Orizaba se comprobó en una sesión aislada de Plasma 6.6.6 con Xvfb y D-Bus.
+Los dos comandos de primera sesión devolvieron `0`; el resultado tuvo un único
+panel inferior, un escritorio con el fondo Path portable, tema Orizaba y
+Konsole abierto con `Perfil 1.profile`.
+
+Estas comprobaciones validan sintaxis, consistencia estática y el arranque de
+los perfiles en sesiones gráficas aisladas. No sustituyen una instalación
+completa en hardware de prueba, porque el flujo real particiona el disco
+seleccionado.
 
 ## Publicación En GitHub
 

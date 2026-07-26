@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Gentoo-HP KDE first-login setup
+Comment=Apply the portable Orizaba Plasma layout once
+Exec=/usr/local/bin/gentoo-hp-kde-first-login
+TryExec=/usr/local/bin/gentoo-hp-kde-first-login
+OnlyShowIn=KDE;
+NoDisplay=true
+Terminal=false
+X-KDE-autostart-phase=2
+X-KDE-StartupNotify=false

@@ -16,6 +16,8 @@ El nombre persistente del kernel y su mantenimiento se documentan en
 [`docs/KERNEL-PERSONALIZADO.md`](docs/KERNEL-PERSONALIZADO.md).
 La integración de fuentes y temas entre KDE y Flatpak se documenta en
 [`docs/FLATPAK-DESKTOP-INTEGRATION.md`](docs/FLATPAK-DESKTOP-INTEGRATION.md).
+El perfil KDE Orizaba, sus fuentes y su proceso de restauración se documentan
+en [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 
 - CPU AMD Ryzen 5 4500U / Renoir, usando `-march=znver2`
 - GPU AMD Radeon Vega integrada, usando `VIDEO_CARDS="amdgpu radeonsi"`
@@ -30,6 +32,8 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Aceleracion AMD Renoir/Vega con Mesa, RadeonSI, RADV, VA-API, VDPAU y Vulkan
 - SDDM como gestor de inicio de sesion
 - KDE Plasma instalado con soporte Wayland
+- Perfil KDE Orizaba portable con panel, colores, atajos, GTK y Konsole
+- Inter e Inter Display instaladas globalmente antes de configurar Plasma
 - Dolphin, Konsole, Discover y Ark con soporte ZIP/7-Zip/RAR
 - Flatpak integrado con Discover, Flathub, fuentes del sistema y tema Breeze
 - Fastfetch para mostrar informacion del sistema
@@ -44,10 +48,10 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 - Gaps de 5 px entre ventanas y extremos, incluso con una sola ventana; VSCodium sin barra de título de Sway y Kitty al 90% de opacidad
 - Tapa gestionada por Sway sin daemon: `eDP-1` se apaga al cerrarla y el Xiaomi `A22FAB-RAGL` usa 1920x1080 a 75 Hz
 - El monitor DZM `FHSD20VF01` usa 1920x1080 a 100.054 Hz mediante su identificador persistente
-- Bloqueo automático deshabilitado; el bloqueo manual permanece disponible
+- Bloqueo automático deshabilitado en MySway; el bloqueo manual permanece disponible
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
 - TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`
-- JetBrains Mono para Kitty; Noto, Noto CJK y Noto Color Emoji para el resto del sistema
+- Inter para Plasma/GTK, JetBrains Mono para terminales y Noto/CJK/Emoji como cobertura completa
 - Stem darkening de FreeType configurado para CFF y el autofitter
 - `.bashrc` preparado con rutas personales, `opencode`, `NO_AT_BRIDGE` y Bash interactivo comodo
 - Carpetas personales XDG en español para KDE, Dolphin, Firefox y Flatpak
@@ -259,11 +263,15 @@ Cuando confirmes, hara en resumen:
 12. Preguntar el usuario normal, pedir su contrasena y preguntar si tendra `sudo`.
 13. Crear su `.bashrc` con rutas personales, `opencode`, `NO_AT_BRIDGE`, `.bashrc.d` y completado sin distinguir mayusculas.
 14. Configurar aceleracion de video para Radeon Vega: Mesa/RadeonSI/RADV, VA-API, VDPAU, Vulkan, FFmpeg, GStreamer y mpv.
-15. Configurar fuentes Unicode para emojis y caracteres CJK, y activar stem darkening de FreeType.
-16. Instalar el perfil modular MySway, su entrada aislada de SDDM, Kitty, Waybar,
+15. Instalar Inter e Inter Display a nivel del sistema, configurar las fuentes
+    Unicode y activar stem darkening de FreeType.
+16. Preparar como usuario el perfil KDE Orizaba saneado, sin importar dispositivos
+    de audio, Bluetooth, monitores, energía ni datos de sesión del equipo de origen,
+    e instalar su aplicador idempotente para la primera sesión Plasma.
+17. Instalar el perfil modular MySway, su entrada aislada de SDDM, Kitty, Waybar,
     Wofi y Mako, además de las carpetas personales XDG en español.
-17. Corregir recursivamente el propietario de su directorio personal y habilitar `sddm`.
-18. Instalar Firefox como binario generico para evitar su compilacion local.
+18. Corregir recursivamente el propietario de su directorio personal y habilitar `sddm`.
+19. Instalar Firefox como binario generico para evitar su compilacion local.
 
 ## Primer Arranque
 
@@ -281,6 +289,14 @@ Inicia sesion con el usuario y la contrasena que definiste durante la
 instalacion. En el selector de SDDM podras elegir KDE Plasma, la entrada Sway
 original o `MySway (aislado)`. Elige esta última para cargar el perfil completo
 sin compartir variables de sesión con Plasma.
+
+Si eliges Plasma, un autostart exclusivo de KDE aplica Orizaba una sola vez
+dentro de la sesión real. Así carga las familias Inter, el esquema de color,
+el fondo, el panel inferior con su altura y flotación, los atajos y el perfil
+predeterminado de Konsole. La disposición de monitores, los dispositivos de
+audio/Bluetooth, la suspensión y el bloqueo de pantalla se detectan o
+configuran localmente; no se restauran desde el equipo donde se extrajo el
+tema.
 
 Atajos iniciales en MySway:
 
@@ -458,6 +474,7 @@ app-emulation/virt-viewer
 app-emulation/virtualbox
 media-video/pipewire
 media-video/wireplumber
+net-misc/rsync
 net-wireless/bluez
 sys-apps/flatpak
 sys-apps/xdg-desktop-portal-gtk
@@ -584,19 +601,33 @@ mpv --hwdec=auto archivo.mp4
 
 El perfil instala:
 
+- `Inter` e `Inter Display` 4.001 desde `contrib/fonts/inter`
 - `media-fonts/fontawesome`
 - `media-fonts/jetbrains-mono`
 - `media-fonts/noto`
 - `media-fonts/noto-cjk`
 - `media-fonts/noto-emoji`
 
-Tambien crea `/etc/fonts/local.conf` con preferencias para `Noto Sans`, `Noto Serif`, `Noto Sans Mono`, variantes CJK y `Noto Color Emoji`.
+Inter e Inter Display se copian primero a:
+
+```text
+/usr/local/share/fonts/gentoo-hp/inter
+```
+
+Los archivos quedan como `root:root` y `0644`, con su licencia OFL-1.1.
+JetBrains Mono y JetBrains Mono NL siguen administradas por Portage para evitar
+caras duplicadas.
+
+Tambien crea `/etc/fonts/local.conf` con `Inter` como familia sans-serif,
+`JetBrains Mono` como monoespaciada y Noto, sus variantes CJK y Noto Color
+Emoji como alternativas completas.
 
 Font Awesome proporciona únicamente los iconos monocromáticos de Waybar. No
 reemplaza las preferencias tipográficas de KDE.
 
-JetBrains Mono se aplica exclusivamente a Kitty junto con una paleta grafito
-cálida y acento ámbar; Konsole y Plasma conservan sus propias preferencias.
+Plasma utiliza Inter, Inter Display y JetBrains Mono NL según el perfil
+Orizaba. Kitty conserva JetBrains Mono junto con una paleta grafito cálida y
+acento ámbar.
 
 Esto ayuda a que KDE Plasma, Sway, terminales, navegadores y apps GTK/Qt rendericen emojis y caracteres chinos, japoneses y coreanos sin cuadros vacios.
 
@@ -618,6 +649,51 @@ que cerrar sesion y volver a entrar, o reiniciar.
 Flatpak monta esas fuentes del anfitrión en rutas `/run/host/*-fonts`. El
 módulo `kde-gtk-config` sincroniza además la fuente de interfaz y la
 monoespaciada elegidas en Plasma.
+
+## Perfil KDE Orizaba
+
+El respaldo de `MyKdeCustom/kde_backup` se incorporó como un perfil portable y
+saneado. Durante la instalación se guarda en:
+
+```text
+/usr/local/share/gentoo-hp/kde/orizaba
+```
+
+y se aplica como el usuario final mediante:
+
+```text
+/usr/local/bin/gentoo-hp-apply-kde
+```
+
+El importador valida sumas SHA-256, rechaza enlaces simbólicos, ajusta las
+rutas al usuario elegido y crea una copia de reversión antes de sobrescribir.
+El manifiesto debe cubrir exactamente todos los archivos: también se rechazan
+extras no declarados.
+Un digest en `~/.local/state/gentoo-hp/kde-profile.sha256` evita que una
+segunda ejecución del instalador machaque personalizaciones si el perfil no
+cambió.
+
+En la primera sesión real,
+`/usr/local/bin/gentoo-hp-kde-first-login` ejecuta
+`plasma-apply-lookandfeel --apply Orizaba --resetLayout` y aplica el fondo
+Path. Si tiene éxito escribe
+`~/.local/state/gentoo-hp/kde-first-login.sha256`; los siguientes inicios no
+vuelven a tocar el escritorio.
+
+Para volver a aplicar el tema manualmente desde una sesión Plasma:
+
+```bash
+gentoo-hp-apply-kde
+```
+
+La reaplicación programa de nuevo el layout para el próximo inicio de Plasma;
+después del comando hay que cerrar sesión y volver a entrar.
+
+El respaldo previo queda bajo
+`~/.local/state/gentoo-hp/kde-restore/`. La lista de elementos excluidos, el
+procedimiento de comprobación y la opción
+`INSTALL_KDE_CUSTOM_PROFILE=false` están en
+[`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 
 ## Despues De Instalar
 
@@ -715,7 +791,10 @@ No se usa LVM en este layout, por lo que `vgchange -an` no es necesario.
 - `gentoo.conf`: perfil listo para la HP Pavilion 15-eh0xxx.
 - `contrib/mysway/rootfs`: configuración completa de MySway y sus utilidades.
 - `contrib/mysway/session`: entrada aislada de SDDM y wrapper de sesión.
+- `contrib/kde/orizaba`: importador, autostart de primera sesión y snapshot saneado del perfil KDE Orizaba.
+- `contrib/fonts/inter`: Inter e Inter Display con licencia OFL-1.1.
 - `tests/validate-mysway.sh`: valida Kitty, Waybar, atajos y ausencia de Quickshell.
+- `tests/validate-kde-profile.sh`: valida fuentes, integridad, saneado e importación de Orizaba.
 - `contrib/dracut/90-gentoo-hp.conf`: configuracion persistente del initramfs.
 - `contrib/kernel/config.d/99-gentoo-hp-localversion.config`: nombre persistente del kernel compilado.
 - `contrib/bin/gentoo-hp-update-boot`: sincroniza kernel e initramfs con el ESP.
@@ -729,6 +808,7 @@ No se usa LVM en este layout, por lo que `vgchange -an` no es necesario.
 - `docs/FUNCIONAMIENTO-Y-FIXES.md`: arquitectura y registro del commit de fixes.
 - `docs/FLATPAK-DESKTOP-INTEGRATION.md`: fuentes, Breeze, portales y verificación con Brave Flatpak.
 - `docs/KERNEL-PERSONALIZADO.md`: nombre del kernel, recompilacion y actualizaciones persistentes.
+- `docs/KDE-PERSONALIZADO.md`: perfil Orizaba, fuentes, seguridad, re-aplicación y rollback.
 - `docs/VIRTUALIZATION.md`: uso y diagnóstico de QEMU/KVM, libvirt y VirtualBox.
 - `gentoo.conf.example`: ejemplo general con las variables nuevas de Portage.
 - `scripts/main.sh`: aplica las optimizaciones de hardware durante la instalacion.

@@ -1,0 +1,19 @@
+Gentoo-HP no distribuye secretos ni datos de sesión en este perfil.
+
+Se excluyeron deliberadamente:
+- KDE Wallet, cookies, credenciales, cachés, sockets y archivos de bloqueo.
+- bluedevilglobalrc, porque bloqueaba Bluetooth.
+- plasmaparc, porque fijaba un dispositivo ALSA del equipo de origen.
+- kwinoutputconfig.json y local/share/kscreen, porque guardaban EDID,
+  conectores, UUID y posiciones de monitores concretos.
+- kscreenlockerrc, powerdevilrc y powermanagementprofilesrc, porque
+  desactivaban bloqueo, suspensión y acciones de energía.
+- config.d/kdedefaults/ksplashrc, porque apuntaba a un splash Orizaba que no
+  existe dentro del paquete.
+- ksmserverrc y archivos de actividad, migración o historial de aplicaciones.
+- fontconfig de usuario y fuentes duplicadas; Gentoo-HP los administra a
+  nivel del sistema.
+- window_decorations.css y los SVG generados de Breeze; kde-gtk-config los
+  vuelve a crear para la versión de Plasma instalada.
+- lastScreen de los containments; el panel se asigna a la pantalla primaria
+  durante la primera sesión sin reutilizar estado del monitor de origen.

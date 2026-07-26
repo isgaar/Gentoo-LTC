@@ -43,7 +43,9 @@ Por ello no se usan overrides como `--filesystem=home`, no se duplica el
 contenido de `/usr/share/fonts` y no se copian Noto CJK o Noto Color Emoji
 dentro de cada aplicación.
 
-El instalador reconstruye la caché de Fontconfig después de configurar Noto.
+El instalador instala primero Inter e Inter Display en
+`/usr/local/share/fonts/gentoo-hp/inter` y después reconstruye la caché de
+Fontconfig junto con JetBrains Mono y las familias Noto.
 Cuando el usuario instala una fuente nueva en `~/.local/share/fonts`, puede
 actualizar la caché con:
 
@@ -86,6 +88,11 @@ El permiso está limitado a `~/.config/gtk-3.0` y es de solo lectura. No expone
 el resto de `~/.config` ni el directorio personal completo. Como consecuencia,
 cualquier marcador o servidor GTK que el usuario guarde en ese mismo
 directorio también será legible por sus aplicaciones Flatpak.
+
+El snapshot Orizaba conserva el esquema de color y los ajustes portables, pero
+no versiona los CSS/SVG de decoración que genera Breeze. En el primer inicio,
+`kde-gtk-config` los crea para la versión instalada de Plasma; así las
+aplicaciones nativas y Flatpak no heredan artefactos generados por otra versión.
 
 ## Comprobación Con Brave
 
