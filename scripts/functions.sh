@@ -933,6 +933,7 @@ function gentoo_umount() {
 }
 
 function init_bash() {
+	export DEBUGINFOD_IMA_CERT_PATH="${DEBUGINFOD_IMA_CERT_PATH:-}"
 	source /etc/profile
 	umask 0077
 	export PS1='(chroot) \[[0;31m\]\u\[[1;31m\]@\h \[[1;34m\]\w \[[m\]\$ \[[m\]'
@@ -941,6 +942,7 @@ function init_bash() {
 function env_update() {
 	env-update \
 		|| die "Error in env-update"
+	export DEBUGINFOD_IMA_CERT_PATH="${DEBUGINFOD_IMA_CERT_PATH:-}"
 	source /etc/profile \
 		|| die "Could not source /etc/profile"
 	umask 0077

@@ -171,6 +171,41 @@ La instalación se divide en dos contextos:
 Las personalizaciones específicas están en `gentoo.conf`; el motor general de
 instalación permanece en `install` y `scripts/`.
 
+### Resiliencia Durante La Instalación
+
+El perfil evita tres interrupciones que ocurrieron en la primera instalación:
+
+- No ejecuta `mirrorselect`; usa directamente `GENTOO_MIRROR`, evitando el
+  fallo de decodificación de `netselect`.
+- Instala `linux-firmware`, `cryptsetup` y `btrfs-progs` antes de compilar e
+  instalar el kernel. Así Dracut puede incluir los módulos `crypt` y `btrfs`
+  en el primer initramfs, y AMDGPU encuentra su firmware desde el primer
+  arranque, en lugar de fallar durante el `pkg_postinst` del kernel.
+- Declara antes de instalar Plasma los USE flags obligatorios de `libcanberra`,
+  FreeType, SDL2 y systemd. La tanda de paquetes usa `--update --newuse` para
+  reconstruir dependencias ya presentes cuando cambian esos flags.
+
+Al finalizar, el perfil habilita SDDM, NetworkManager, Bluetooth y los sockets
+de PipeWire/PulseAudio, además de WirePlumber, mediante systemd. También crea
+los directorios XDG en español para el usuario, por lo que el primer inicio no
+requiere comandos manuales de reparación.
+
+### Cobertura Del Registro Del 25/07/2026
+
+| Incidencia observada | Corrección persistente | Comprobación automatizada |
+| --- | --- | --- |
+| `mirrorselect` termina con `UnicodeDecodeError` | `SELECT_MIRRORS=false`; se usa el mirror configurado | Se comprueba el valor del perfil |
+| Dracut no puede instalar `crypt` o `btrfs` | Firmware, `cryptsetup` y `btrfs-progs` se fusionan antes del kernel | Se comprueba la función y su orden respecto a `gentoo-kernel` |
+| AMDGPU falla al iniciar y SDDM no aparece | `linux-firmware` queda antes del primer kernel; AMDGPU se fuerza en Dracut | Se comprueba el prerequisito de firmware |
+| Conflictos de `systemd`, `libcanberra`, FreeType y SDL2 | USE flags específicos y `emerge --update --newuse` | Se comprueban los cuatro flags y la invocación de Portage |
+| Sin red, audio o Bluetooth en el primer inicio | Se habilitan NetworkManager, SDDM, Bluetooth, sockets PipeWire/Pulse y WirePlumber | Se comprueban las unidades en `after_install` |
+| Carpetas `Downloads`/`Desktop` duplicadas | Se crean y configuran las rutas XDG españolas antes del primer login | Se comprueban las seis rutas XDG |
+| `DEBUGINFOD_IMA_CERT_PATH: unbound variable` | Se restaura la exportación vacía antes de cada carga de `/etc/profile` | Sintaxis Bash y cobertura de las rutas de perfil |
+
+La prueba `tests/validate-install-resilience.sh` protege estas condiciones sin
+necesitar ejecutar una instalación destructiva. Debe correrse junto con las
+validaciones de KDE y MySway antes de publicar cambios del instalador.
+
 ## MySway Aislado Y Kitty
 
 El perfil gráfico completo vive en:

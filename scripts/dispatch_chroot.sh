@@ -4,6 +4,11 @@ set -uo pipefail
 [[ $EXECUTED_IN_CHROOT != "true" ]] \
 	&& { echo "This script must not be executed directly!" >&2; exit 1; }
 
+# debuginfod.sh is sourced by /etc/profile and expands this variable while the
+# installer runs with nounset enabled.  env-update can remove an empty export,
+# so restore it before loading the profile.
+export DEBUGINFOD_IMA_CERT_PATH="${DEBUGINFOD_IMA_CERT_PATH:-}"
+
 # Source the systems profile
 source /etc/profile
 

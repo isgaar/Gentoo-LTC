@@ -405,11 +405,6 @@ function install_kernel_bios() {
 }
 
 function install_kernel() {
-	einfo "Installing linux-firmware"
-	echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license \
-		|| die "Could not write to /etc/portage/package.license"
-	try emerge --verbose sys-kernel/linux-firmware
-
 	# Install vanilla kernel
 	einfo "Installing vanilla kernel and related tools"
 
@@ -419,6 +414,34 @@ function install_kernel() {
 		install_kernel_bios
 	fi
 
+}
+
+function install_initramfs_dependencies() {
+	# Dracut reads its configured modules while the kernel post-install hook is
+	# running.  Install the userspace tools for the selected root filesystem
+	# before emerging the kernel, otherwise that hook fails and leaves a kernel
+	# installed but undeployed.
+	einfo "Installing linux-firmware before installing the kernel"
+	echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license \
+		|| die "Could not write to /etc/portage/package.license"
+	try emerge --verbose sys-kernel/linux-firmware
+
+	if [[ $USED_LUKS == "true" ]]; then
+		einfo "Installing cryptsetup before generating the initramfs"
+		try emerge --verbose sys-fs/cryptsetup
+
+		if [[ $SYSTEMD == "true" ]]; then
+			einfo "Enabling systemd cryptsetup support before kernel installation"
+			echo "sys-apps/systemd cryptsetup" > /etc/portage/package.use/systemd \
+				|| die "Could not write /etc/portage/package.use/systemd"
+			try emerge --verbose --changed-use --oneshot sys-apps/systemd
+		fi
+	fi
+
+	if [[ $USED_BTRFS == "true" ]]; then
+		einfo "Installing btrfs-progs before generating the initramfs"
+		try emerge --verbose sys-fs/btrfs-progs
+	fi
 }
 
 function add_fstab_entry() {
@@ -520,6 +543,7 @@ EOF
 	einfo "Enabling dracut USE flag on sys-kernel/installkernel"
 	echo "sys-kernel/installkernel dracut" > /etc/portage/package.use/installkernel \
 		|| die "Could not write /etc/portage/package.use/installkernel"
+	install_initramfs_dependencies
 
 	# Install required programs and kernel now, in order to
 	# prevent emerging module before an imminent kernel upgrade
@@ -529,26 +553,6 @@ EOF
 	else
 		einfo "Installing binary kernel (sys-kernel/gentoo-kernel-bin)"
 		try emerge --verbose sys-kernel/dracut sys-kernel/gentoo-kernel-bin app-arch/zstd
-	fi
-
-	# Install cryptsetup if we used LUKS
-	if [[ $USED_LUKS == "true" ]]; then
-		einfo "Installing cryptsetup"
-		try emerge --verbose sys-fs/cryptsetup
-	fi
-
-	if [[ $SYSTEMD == "true" && $USED_LUKS == "true" ]] ; then
-		einfo "Enabling cryptsetup USE flag on sys-apps/systemd"
-		echo "sys-apps/systemd cryptsetup" > /etc/portage/package.use/systemd \
-			|| die "Could not write /etc/portage/package.use/systemd"
-		einfo "Rebuilding systemd with changed USE flag"
-		try emerge --verbose --changed-use --oneshot sys-apps/systemd
-	fi
-
-	# Install btrfs-progs if we used Btrfs
-	if [[ $USED_BTRFS == "true" ]]; then
-		einfo "Installing btrfs-progs"
-		try emerge --verbose sys-fs/btrfs-progs
 	fi
 
 	try emerge --verbose dev-vcs/git
@@ -618,8 +622,9 @@ EOF
 	# Install additional packages, if any.
 	if [[ ${#ADDITIONAL_PACKAGES[@]} -gt 0 ]]; then
 		einfo "Installing additional packages"
-		# shellcheck disable=SC2086
-		try emerge --verbose --autounmask-continue=y -- "${ADDITIONAL_PACKAGES[@]}"
+		# --update --newuse rebuilds already-installed dependencies such as
+		# systemd when the profile enables a required USE flag for the desktop.
+		try emerge --verbose --update --newuse --autounmask-continue=y -- "${ADDITIONAL_PACKAGES[@]}"
 	fi
 
 	if ask "Do you want to assign a root password now?"; then
