@@ -50,7 +50,7 @@ en [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 - El monitor DZM `FHSD20VF01` usa 1920x1080 a 100.054 Hz mediante su identificador persistente
 - Bloqueo automático deshabilitado en MySway; el bloqueo manual permanece disponible
 - Teclado `latam` y touchpad con tap/natural scroll en Sway
-- TLP con soporte `ppd`, habilitando `tlp.service` y `tlp-pd.service`
+- power-profiles-daemon para gestión nativa de perfiles de energía en KDE Plasma y modulación de EPP en Ryzen 5 5600G
 - Inter para Plasma/GTK, JetBrains Mono para terminales y Noto/CJK/Emoji como cobertura completa
 - Stem darkening de FreeType configurado para CFF y el autofitter
 - `.bashrc` preparado con rutas personales, `opencode`, `NO_AT_BRIDGE` y Bash interactivo comodo
@@ -252,10 +252,10 @@ Cuando confirmes, hara en resumen:
 4. Crear swap de 16 GiB.
 5. Crear root Btrfs cifrado con LUKS.
 6. Descargar y extraer stage3 `amd64-systemd`.
-7. Configurar Portage para Ryzen 5 4500U y Radeon Vega.
-8. Instalar el fragmento persistente de version y compilar el kernel Gentoo desde fuente como `X.X.X-gentoo4hp-pavilion-15`.
-9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, Kitty, TLP,
-   `tlp-pd`, PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager,
+7. Configurar Portage para Ryzen 5 5600G y Radeon Vega.
+8. Instalar el fragmento persistente de version y compilar el kernel Gentoo desde fuente como `X.X.X-gentoo4thinkcentre-m75s`.
+9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, Kitty, power-profiles-daemon,
+   PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager,
    VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Btop, Ark y
    herramientas de compresion.
 10. Crear una configuracion persistente de Dracut con soporte temprano para `amdgpu` y `nvme`.
@@ -447,7 +447,7 @@ Se compilan normalmente desde los ebuilds:
 - Mesa y LLVM;
 - systemd y componentes base que necesiten reconstruccion;
 - KDE Plasma y sus aplicaciones;
-- Sway, TLP y la pila PipeWire;
+- Sway, power-profiles-daemon y la pila PipeWire;
 - QEMU, libvirt, Virt-Manager y VirtualBox.
 
 Firefox es la excepcion explicita y se instala mediante `www-client/firefox-bin`. Las herramientas de escritorio añadidas son:
