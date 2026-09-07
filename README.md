@@ -38,7 +38,6 @@ en [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 - Flatpak integrado con Discover, Flathub, fuentes del sistema y tema Breeze
 - Fastfetch para mostrar informacion del sistema
 - Btop para monitorizar CPU, memoria, procesos, discos y red
-- Firefox precompilado mediante `www-client/firefox-bin`
 - PipeWire + WirePlumber con ALSA, compatibilidad Pulse y RTKit
 - BlueZ habilitado para el Intel AX200, Bluedevil y audio Bluetooth
 - QEMU/KVM, libvirt, Virt-Manager y VirtualBox para máquinas virtuales
@@ -271,7 +270,6 @@ Cuando confirmes, hara en resumen:
 17. Instalar el perfil modular MySway, su entrada aislada de SDDM, Kitty, Waybar,
     Wofi y Mako, además de las carpetas personales XDG en español.
 18. Corregir recursivamente el propietario de su directorio personal y habilitar `sddm`.
-19. Instalar Firefox como binario generico para evitar su compilacion local.
 
 ## Primer Arranque
 
@@ -450,7 +448,7 @@ Se compilan normalmente desde los ebuilds:
 - Sway, power-profiles-daemon y la pila PipeWire;
 - QEMU, libvirt, Virt-Manager y VirtualBox.
 
-Firefox es la excepcion explicita y se instala mediante `www-client/firefox-bin`. Las herramientas de escritorio añadidas son:
+Las herramientas de escritorio añadidas son:
 
 ```text
 kde-apps/ark

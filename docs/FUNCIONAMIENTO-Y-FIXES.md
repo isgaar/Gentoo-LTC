@@ -438,18 +438,9 @@ KERNEL_TYPE=source
 ```
 
 Por tanto, Portage compila normalmente el kernel, Mesa, LLVM, systemd, KDE
-Plasma, Sway, TLP y PipeWire. El kernel compilado conserva el sufijo
-`-gentoo4hp-pavilion-15` en cada actualizacion gracias al fragmento de
+Plasma, Sway, power-profiles-daemon y PipeWire. El kernel compilado conserva el sufijo
+`-gentoo4thinkcentre-m75s` en cada actualizacion gracias al fragmento de
 `/etc/kernel/config.d`.
-
-Firefox es la excepción deliberada:
-
-```text
-www-client/firefox-bin
-```
-
-Esto reduce el tiempo de instalación del navegador sin convertir en binarios
-genéricos los componentes centrales del sistema.
 
 ## KDE, Sway Y Herramientas De Escritorio
 
