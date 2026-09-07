@@ -1,23 +1,23 @@
 # Nombre Persistente Del Kernel
 
-Gentoo-HP compila `sys-kernel/gentoo-kernel` desde fuente y configura su
+Gentoo-LTC compila `sys-kernel/gentoo-kernel` desde fuente y configura su
 identidad para que la version informada por `uname` tenga esta forma:
 
 ```text
-X.X.X-gentoo4hp-pavilion-15
+X.X.X-gentoo4thinkcentre-m75s
 ```
 
 Por ejemplo, para Linux 6.18.39:
 
 ```text
-6.18.39-gentoo4hp-pavilion-15
+6.18.39-gentoo4thinkcentre-m75s
 ```
 
 Fastfetch obtiene esta informacion del kernel en ejecucion, por lo que despues
 de arrancar el kernel nuevo mostrara:
 
 ```text
-Kernel: Linux 6.18.39-gentoo4hp-pavilion-15
+Kernel: Linux 6.18.39-gentoo4thinkcentre-m75s
 ```
 
 ## Configuracion Persistente
@@ -37,15 +37,15 @@ El instalador lo copia antes de compilar el kernel a:
 Su contenido es:
 
 ```text
-CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"
+CONFIG_LOCALVERSION="-gentoo4thinkcentre-m75s"
 # CONFIG_LOCALVERSION_AUTO is not set
 ```
 
 `sys-kernel/gentoo-kernel` propone inicialmente `-gentoo-dist`. El sistema de
 compilacion de los Distribution Kernels de Gentoo aplica los fragmentos de
 `/etc/kernel/config.d` al final, por lo que el valor anterior se sustituye y no
-se concatena. El resultado es `-gentoo4hp-pavilion-15`, no
-`-gentoo-dist-gentoo4hp-pavilion-15`.
+se concatena. El resultado es `-gentoo4thinkcentre-m75s`, no
+`-gentoo-dist-gentoo4thinkcentre-m75s`.
 
 Desactivar `CONFIG_LOCALVERSION_AUTO` evita que un identificador de Git se
 agregue automaticamente al nombre.
@@ -64,9 +64,9 @@ No se necesita ningun comando adicional. El orden del instalador es:
 Las rutas versionadas resultantes siguen el mismo nombre:
 
 ```text
-/usr/src/linux-X.X.X-gentoo4hp-pavilion-15
-/lib/modules/X.X.X-gentoo4hp-pavilion-15
-/boot/kernel-X.X.X-gentoo4hp-pavilion-15
+/usr/src/linux-X.X.X-gentoo4thinkcentre-m75s
+/lib/modules/X.X.X-gentoo4thinkcentre-m75s
+/boot/kernel-X.X.X-gentoo4thinkcentre-m75s
 ```
 
 El menu GRUB de Gentoo-HP conserva sus rutas estables:
@@ -133,7 +133,7 @@ grep -E '^CONFIG_LOCALVERSION=|CONFIG_LOCALVERSION_AUTO' \
   /usr/src/linux/.config
 readlink /usr/src/linux
 find /lib/modules -maxdepth 1 -type d \
-  -name '*-gentoo4hp-pavilion-15'
+  -name '*-gentoo4thinkcentre-m75s'
 ```
 
 Reinicia:

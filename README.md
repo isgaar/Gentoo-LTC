@@ -1,6 +1,6 @@
-# Gentoo-HP
+# Gentoo-LTC
 
-Perfil de instalacion de Gentoo para una **HP Pavilion Laptop 15-eh0xxx** con Ryzen 5 4500U.
+Perfil de instalacion de Gentoo para un **Lenovo ThinkCentre M75s Gen 2** con AMD Ryzen 5 5600G.
 
 Este proyecto esta basado explicitamente en el repositorio original
 [oddlama/gentoo-install](https://github.com/oddlama/gentoo-install).
@@ -19,22 +19,22 @@ La integración de fuentes y temas entre KDE y Flatpak se documenta en
 El perfil KDE Orizaba, sus fuentes y su proceso de restauración se documentan
 en [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 
-- CPU AMD Ryzen 5 4500U / Renoir, usando `-march=znver2`
-- GPU AMD Radeon Vega integrada, usando `VIDEO_CARDS="amdgpu radeonsi"`
-- Wi-Fi Intel Wi-Fi 6 AX200
-- Disco NVMe
+- CPU AMD Ryzen 5 5600G / Cezanne, usando `-march=znver3` y 12 hilos de compilación
+- GPU AMD Radeon Vega integrada (Cezanne), usando `VIDEO_CARDS="amdgpu radeonsi"`
+- Wi-Fi Intel Wi-Fi 6 AX200 (reutilizado del equipo anterior)
+- Disco NVMe (reutilizado del equipo anterior)
 - Gentoo `amd64` con `systemd`
-- Nombre visible `HPGentoo`, con hostname tecnico compatible `hpgentoo`
-- Kernel compilado localmente con `sys-kernel/gentoo-kernel` e identificado como `X.X.X-gentoo4hp-pavilion-15`
+- Nombre visible `Gentoo-LTC`, con hostname tecnico compatible `gentooltc`
+- Kernel compilado localmente con `sys-kernel/gentoo-kernel` e identificado como `X.X.X-gentoo4thinkcentre-m75s`
 - Root en Btrfs con LUKS
 - Dracut persistente con carga temprana de `nvme` y `amdgpu`
 - NetworkManager + iwd para Wi-Fi
-- Aceleracion AMD Renoir/Vega con Mesa, RadeonSI, RADV, VA-API, VDPAU y Vulkan
+- Aceleracion AMD Cezanne/Vega con Mesa, RadeonSI, RADV, VA-API, VDPAU y Vulkan
 - SDDM como gestor de inicio de sesion
-- KDE Plasma instalado con soporte Wayland
+- KDE Plasma instalado con soporte Wayland y Dolphin con soporte MTP (`kde-apps/kio-extras`)
 - Perfil KDE Orizaba portable con panel, colores, atajos, GTK y Konsole
 - Inter e Inter Display instaladas globalmente antes de configurar Plasma
-- Dolphin, Konsole, Discover y Ark con soporte ZIP/7-Zip/RAR
+- Dolphin, Konsole, Discover y Ark con soporte ZIP/7-Zip/RAR y MTP
 - Flatpak integrado con Discover, Flathub, fuentes del sistema y tema Breeze
 - Fastfetch para mostrar informacion del sistema
 - Btop para monitorizar CPU, memoria, procesos, discos y red
@@ -574,8 +574,8 @@ Instala y configura:
 Tambien crea:
 
 ```text
-/etc/environment.d/90-amd-renoir-gpu.conf
-/etc/profile.d/90-amd-renoir-gpu.sh
+/etc/environment.d/90-amd-cezanne-gpu.conf
+/etc/profile.d/90-amd-cezanne-gpu.sh
 ```
 
 con:
