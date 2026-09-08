@@ -12,7 +12,7 @@ La solución se comprobó con:
 - codec interno Realtek ALC287;
 - controlador de micrófono AMD ACP/Renoir;
 - audio HDMI/DisplayPort de AMDGPU;
-- Intel Wi-Fi 6 AX200 con Bluetooth;
+- Intel Wireless-AC 9260 / AX200 con Bluetooth;
 - kernel `6.18.39-gentoo-dist`;
 - PipeWire 1.6.7;
 - WirePlumber 0.5.15;

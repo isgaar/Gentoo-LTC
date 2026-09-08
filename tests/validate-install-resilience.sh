@@ -32,6 +32,7 @@ for unit in \
 	'pipewire-pulse.socket' \
 	'wireplumber.service' \
 	'bluetooth.service' \
+	'cups.service' \
 	'NetworkManager' \
 	'sddm.service'; do
 	grep -Fq "$unit" <<<"$after_install"

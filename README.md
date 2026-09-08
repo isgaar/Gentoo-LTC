@@ -21,7 +21,9 @@ en [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 
 - CPU AMD Ryzen 5 5600G / Cezanne, usando `-march=znver3` y 12 hilos de compilación
 - GPU AMD Radeon Vega integrada (Cezanne), usando `VIDEO_CARDS="amdgpu radeonsi"`
-- Wi-Fi Intel Wi-Fi 6 AX200 (reutilizado del equipo anterior)
+- Ethernet Realtek RTL8111/8168/8411 PCIe Gigabit Ethernet (controlador `r8169`)
+- Wi-Fi Intel Wireless-AC 9260 160MHz (controlador `iwlwifi`)
+- Bluetooth Intel Wireless-AC 9260 (controlador `btusb`) integrado
 - Disco NVMe (reutilizado del equipo anterior)
 - Gentoo `amd64` con `systemd`
 - Nombre visible `Gentoo-LTC`, con hostname tecnico compatible `gentooltc`
@@ -39,7 +41,9 @@ en [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md).
 - Fastfetch para mostrar informacion del sistema
 - Btop para monitorizar CPU, memoria, procesos, discos y red
 - PipeWire + WirePlumber con ALSA, compatibilidad Pulse y RTKit
-- BlueZ habilitado para el Intel AX200, Bluedevil y audio Bluetooth
+- BlueZ habilitado para el Intel Wireless-AC 9260, Bluedevil y audio Bluetooth
+- Servicio de impresion CUPS habilitado con `net-print/cups`, `cups-filters` y `kde-plasma/print-manager`
+- Grupos `lp` y `lpadmin` asignados al usuario normal para administracion de impresoras
 - QEMU/KVM, libvirt, Virt-Manager y VirtualBox para máquinas virtuales
 - Sway como entorno grafico Wayland
 - MySway modular con Kitty, Waybar, Wofi, Mako, swaylock y wl-clipboard
@@ -254,7 +258,7 @@ Cuando confirmes, hara en resumen:
 7. Configurar Portage para Ryzen 5 5600G y Radeon Vega.
 8. Instalar el fragmento persistente de version y compilar el kernel Gentoo desde fuente como `X.X.X-gentoo4thinkcentre-m75s`.
 9. Instalar firmware, NetworkManager, iwd, SDDM, KDE Plasma, Sway, Kitty, power-profiles-daemon,
-   PipeWire, WirePlumber, BlueZ, QEMU/KVM, libvirt, Virt-Manager,
+   PipeWire, WirePlumber, BlueZ, CUPS (cups, cups-filters, print-manager), QEMU/KVM, libvirt, Virt-Manager,
    VirtualBox, Dolphin, Konsole, Discover, Flatpak, Fastfetch, Btop, Ark y
    herramientas de compresion.
 10. Crear una configuracion persistente de Dracut con soporte temprano para `amdgpu` y `nvme`.
@@ -518,7 +522,7 @@ sesion. PipeWire se compila con `sound-server`, `pipewire-alsa`, `bluetooth`,
 El instalador activa los monitores ALSA y BlueZ de WirePlumber, habilita
 globalmente los servicios de usuario de PipeWire y habilita
 `bluetooth.service`. Esto evita que KDE muestre solamente `Dummy Output` y
-permite que el Intel AX200 busque dispositivos.
+permite que el adaptador Bluetooth Intel Wireless-AC 9260 busque dispositivos.
 
 Comprobacion rapida:
 

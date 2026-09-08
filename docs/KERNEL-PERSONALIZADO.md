@@ -22,16 +22,17 @@ Kernel: Linux 6.18.39-gentoo4thinkcentre-m75s
 
 ## Configuracion Persistente
 
-El repositorio incluye:
+El repositorio incluye fragmentos en:
 
 ```text
-contrib/kernel/config.d/99-gentoo-hp-localversion.config
+contrib/kernel/config.d/10-network-hardware.config
+contrib/kernel/config.d/99-gentoo-ltc-localversion.config
 ```
 
-El instalador lo copia antes de compilar el kernel a:
+El instalador los copia antes de compilar el kernel a:
 
 ```text
-/etc/kernel/config.d/99-gentoo-hp-localversion.config
+/etc/kernel/config.d/
 ```
 
 Su contenido es:
@@ -83,11 +84,11 @@ Por ello no necesita contener la version en `grub.cfg`.
 Instala primero el fragmento desde una copia actualizada del repositorio:
 
 ```bash
-cd ~/Documentos/Gentoo-HP
+cd ~/Proyectos/Gentoo-LTC
 sudo install -d -m0755 /etc/kernel/config.d
 sudo install -m0644 \
-  contrib/kernel/config.d/99-gentoo-hp-localversion.config \
-  /etc/kernel/config.d/99-gentoo-hp-localversion.config
+  contrib/kernel/config.d/*.config \
+  /etc/kernel/config.d/
 sudo install -d -m0755 \
   /etc/kernel/install.d \
   /etc/kernel/postinst.d \
