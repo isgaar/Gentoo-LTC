@@ -309,7 +309,7 @@ El modo predeterminado usa:
 ```bash
 TARGET_DISK="auto-nvme"
 create_classic_single_disk_layout \
-    swap=16GiB type=efi luks=true root_fs=btrfs "$TARGET_DISK"
+    swap=20GiB type=efi luks=true root_fs=btrfs "$TARGET_DISK"
 ```
 
 `auto-nvme` solamente continúa si detecta exactamente un disco NVMe. Esto evita
