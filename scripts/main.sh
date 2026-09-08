@@ -37,11 +37,12 @@ function mark_install_step_done() {
 }
 
 function restore_install_user_configuration() {
-	local state_file saved_user saved_admin
+	local state_file saved_user saved_admin saved_root_password_policy
 	state_file="$(install_state_file)"
 	[[ -f "$state_file" ]] || return 0
 	saved_user="$(awk -F= '$1 == "user" { print substr($0, 6); exit }' "$state_file")"
 	saved_admin="$(awk -F= '$1 == "admin" { print substr($0, 7); exit }' "$state_file")"
+	saved_root_password_policy="$(awk -F= '$1 == "root_password_from_user" { print substr($0, 25); exit }' "$state_file")"
 	[[ -n "$saved_user" ]] || return 0
 	[[ "$saved_user" =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] \
 		|| die "Invalid saved installation user in checkpoint"
@@ -49,6 +50,9 @@ function restore_install_user_configuration() {
 		|| die "Invalid saved sudo setting in checkpoint"
 	INSTALL_USER="$saved_user"
 	INSTALL_USER_ADMIN="$saved_admin"
+	if [[ "$saved_root_password_policy" == "true" || "$saved_root_password_policy" == "false" ]]; then
+		INSTALL_ROOT_PASSWORD_FROM_USER="$saved_root_password_policy"
+	fi
 	INSTALL_USER_CONFIG_READY=true
 	einfo "Restored user configuration for '$INSTALL_USER' from checkpoint"
 }
@@ -58,12 +62,13 @@ function save_install_user_configuration() {
 	state_file="$(install_state_file)"
 	temp_file="${state_file}.tmp.$$"
 	if [[ -f "$state_file" ]]; then
-		awk '!/^(user|admin)=/' "$state_file" > "$temp_file" \
+		awk '!/^(user|admin|root_password_from_user)=/' "$state_file" > "$temp_file" \
 			|| die "Could not update installation checkpoint"
 	else
 		: > "$temp_file" || die "Could not create installation checkpoint"
 	fi
-	printf 'user=%s\nadmin=%s\n' "$INSTALL_USER" "$INSTALL_USER_ADMIN" >> "$temp_file" \
+	printf 'user=%s\nadmin=%s\nroot_password_from_user=%s\n' \
+		"$INSTALL_USER" "$INSTALL_USER_ADMIN" "$INSTALL_ROOT_PASSWORD_FROM_USER" >> "$temp_file" \
 		|| die "Could not write user checkpoint"
 	chmod 0600 "$temp_file" || die "Could not protect installation checkpoint"
 	mv -f -- "$temp_file" "$state_file" || die "Could not save installation checkpoint"
@@ -721,7 +726,10 @@ EOF
 	fi
 
 	if ! install_step_done 'post-install-configured'; then
-		if ask "Do you want to assign a root password now?"; then
+		if [[ "${INSTALL_ROOT_PASSWORD_FROM_USER:-false}" == "true" ]] \
+			&& passwd -S root 2>/dev/null | awk '{exit $2 != "P"}'; then
+			einfo "Root already uses the password selected for '$INSTALL_USER'."
+		elif ask "Do you want to assign a root password now?"; then
 			try passwd root
 			einfo "Root password assigned"
 		else
