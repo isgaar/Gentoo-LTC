@@ -50,6 +50,14 @@ sync_line="$(grep -n 'Syncing portage tree' "$installer" | cut -d: -f1)"
 [[ "$user_creation_line" -lt "$sync_line" ]]
 user_creation_function="$(sed -n '/^function ensure_install_user_exists()/,/^}/p' "$profile")"
 grep -Fq 'passwd "$INSTALL_USER"' <<<"$user_creation_function"
+grep -Fq 'passwd -S "$INSTALL_USER"' <<<"$user_creation_function"
+grep -Fq 'command -v visudo' "$profile"
+
+grep -Fq 'GENTOO_INSTALL_RESUME_FILE_NAME' "$repo_dir/install"
+grep -Fq "function install_step_done()" "$installer"
+grep -Fq "mark_install_step_done 'stage3-extracted'" "$installer"
+grep -Fq "mark_install_step_done 'system-updated'" "$installer"
+grep -Fq "restore_install_user_configuration" "$installer"
 
 after_install="$(sed -n '/^function after_install()/,/^}/p' "$profile")"
 for unit in \

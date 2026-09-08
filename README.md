@@ -82,6 +82,7 @@ cd Gentoo-LTC
 5. **Kernel y Drivers:** Aplica el fragmento persistente de hardware de red (`10-network-hardware.config`), compila `sys-kernel/gentoo-kernel` y genera el initramfs con Dracut.
 6. **Pila de Software y Servicios:** Instala KDE Plasma, MySway, PipeWire, BlueZ, CUPS, NetworkManager, libvirt/QEMU, fuentes Inter/JetBrains Mono y utilidades de sistema.
 7. **Configuración de Usuario:** Pregunta interactivamente el nombre de usuario, contraseña y privilegios de `sudo` (grupo `wheel`) antes de las compilaciones largas; la contraseña no se guarda en `gentoo.conf`. Después configura directorios personales XDG en español protegidos contra sobreescritura.
+8. **Reanudación segura:** Cada fase terminada se guarda junto a `gentoo.conf` en un archivo privado de estado. Si una fase falla, ejecutar `./install` continúa desde el último checkpoint y no vuelve a particionar ni a repetir las compilaciones ya finalizadas. El archivo no almacena contraseñas ni claves.
 
 ---
 

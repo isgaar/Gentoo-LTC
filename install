@@ -125,6 +125,15 @@ if [[ "$ACTION" != "chroot" ]]; then
 
 	preprocess_config
 
+	# Keep resumable-installation state next to the configuration, rather than
+	# under /tmp.  The repository is bind-mounted into the chroot, so the same
+	# file remains available on both sides of the chroot boundary.  Including
+	# the configuration digest prevents a checkpoint from being reused after a
+	# materially different installation configuration is selected.
+	config_digest="$(sha256sum "$CONFIG" | awk '{print $1}')" \
+		|| die "Could not calculate configuration digest"
+	export GENTOO_INSTALL_RESUME_FILE_NAME=".gentoo-install-${config_digest}.state"
+
 	# The LUKS key is only needed while preparing the disk in the live
 	# environment. Do not expose it to emerge and the rest of the chroot.
 	[[ ${EXECUTED_IN_CHROOT-false} == "true" ]] \

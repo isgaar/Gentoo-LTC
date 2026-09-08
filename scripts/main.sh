@@ -5,6 +5,70 @@ source "$GENTOO_INSTALL_REPO_DIR/scripts/protection.sh" || exit 1
 ################################################
 # Functions
 
+# The checkpoint file intentionally contains only completed phase names: it
+# never contains passwords, encryption keys, or any other configuration value.
+# GENTOO_INSTALL_REPO_DIR changes to the bind mount inside the chroot, which is
+# precisely what lets both installer processes use the same persistent file.
+function install_state_file() {
+	printf '%s/%s\n' "$GENTOO_INSTALL_REPO_DIR" \
+		"${GENTOO_INSTALL_RESUME_FILE_NAME:-.gentoo-install.state}"
+}
+
+function install_step_done() {
+	local step="$1"
+	local state_file
+	state_file="$(install_state_file)"
+	[[ -f "$state_file" ]] && grep -Fqx "done=$step" "$state_file"
+}
+
+function mark_install_step_done() {
+	local step="$1"
+	local state_file temp_file
+	state_file="$(install_state_file)"
+	install_step_done "$step" && return 0
+	temp_file="${state_file}.tmp.$$"
+	{
+		[[ -f "$state_file" ]] && cat -- "$state_file"
+		printf 'done=%s\n' "$step"
+	} > "$temp_file" || die "Could not write installation checkpoint"
+	chmod 0600 "$temp_file" || die "Could not protect installation checkpoint"
+	mv -f -- "$temp_file" "$state_file" || die "Could not save installation checkpoint"
+	einfo "Checkpoint saved: $step"
+}
+
+function restore_install_user_configuration() {
+	local state_file saved_user saved_admin
+	state_file="$(install_state_file)"
+	[[ -f "$state_file" ]] || return 0
+	saved_user="$(awk -F= '$1 == "user" { print substr($0, 6); exit }' "$state_file")"
+	saved_admin="$(awk -F= '$1 == "admin" { print substr($0, 7); exit }' "$state_file")"
+	[[ -n "$saved_user" ]] || return 0
+	[[ "$saved_user" =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] \
+		|| die "Invalid saved installation user in checkpoint"
+	[[ "$saved_admin" == "true" || "$saved_admin" == "false" ]] \
+		|| die "Invalid saved sudo setting in checkpoint"
+	INSTALL_USER="$saved_user"
+	INSTALL_USER_ADMIN="$saved_admin"
+	INSTALL_USER_CONFIG_READY=true
+	einfo "Restored user configuration for '$INSTALL_USER' from checkpoint"
+}
+
+function save_install_user_configuration() {
+	local state_file temp_file
+	state_file="$(install_state_file)"
+	temp_file="${state_file}.tmp.$$"
+	if [[ -f "$state_file" ]]; then
+		awk '!/^(user|admin)=/' "$state_file" > "$temp_file" \
+			|| die "Could not update installation checkpoint"
+	else
+		: > "$temp_file" || die "Could not create installation checkpoint"
+	fi
+	printf 'user=%s\nadmin=%s\n' "$INSTALL_USER" "$INSTALL_USER_ADMIN" >> "$temp_file" \
+		|| die "Could not write user checkpoint"
+	chmod 0600 "$temp_file" || die "Could not protect installation checkpoint"
+	mv -f -- "$temp_file" "$state_file" || die "Could not save installation checkpoint"
+}
+
 function install_stage3() {
 	prepare_installation_environment
 	apply_disk_configuration
@@ -474,23 +538,26 @@ function generate_fstab() {
 
 function main_install_gentoo_in_chroot() {
 	[[ $# == 0 ]] || die "Too many arguments"
+	restore_install_user_configuration
 
-	maybe_exec 'before_install'
+	if ! install_step_done 'system-updated'; then
+		maybe_exec 'before_install'
+		save_install_user_configuration
 
-	# Remove the root password, making the account accessible for automated
-	# tasks during the period of installation.
-	einfo "Clearing root password"
-	passwd -d root \
-		|| die "Could not change root password"
+		# Remove the root password, making the account accessible for automated
+		# tasks during the period of installation.
+		einfo "Clearing root password"
+		passwd -d root \
+			|| die "Could not change root password"
 
-	# Ask for the normal user's password before long package builds.  This keeps
-	# the credential out of configuration files and makes the account usable if a
-	# later build must be resumed.
-	maybe_exec 'ensure_install_user_exists'
+		# Ask for the normal user's password before long package builds.  This keeps
+		# the credential out of configuration files and makes the account usable if a
+		# later build must be resumed.
+		maybe_exec 'ensure_install_user_exists'
 
-	# Sync portage
-	einfo "Syncing portage tree"
-	try emerge-webrsync
+		# Sync portage
+		einfo "Syncing portage tree"
+		try emerge-webrsync
 
 	# Install mdadm if we used RAID (needed for UUID resolving)
 	if [[ $USED_RAID == "true" ]]; then
@@ -648,25 +715,34 @@ EOF
 	# stable versions available for the selected architecture and USE flags.
 	einfo "Updating the complete system to the current stable package set"
 	try emerge --verbose --update --deep --newuse @world
-
-	if ask "Do you want to assign a root password now?"; then
-		try passwd root
-		einfo "Root password assigned"
+		mark_install_step_done 'system-updated'
 	else
-		try passwd -d root
-		ewarn "Root password cleared, set one as soon as possible!"
+		einfo "Resuming after completed system update; skipping completed package builds"
 	fi
 
-	# If configured, change to gentoo testing at the last moment.
-	# This is to ensure a smooth installation process. You can deal
-	# with the blockers after installation ;)
-	if [[ $USE_PORTAGE_TESTING == "true" ]]; then
-		einfo "Adding ~$GENTOO_ARCH to ACCEPT_KEYWORDS"
-		echo "ACCEPT_KEYWORDS=\"~$GENTOO_ARCH\"" >> /etc/portage/make.conf \
-			|| die "Could not modify /etc/portage/make.conf"
-	fi
+	if ! install_step_done 'post-install-configured'; then
+		if ask "Do you want to assign a root password now?"; then
+			try passwd root
+			einfo "Root password assigned"
+		else
+			try passwd -d root
+			ewarn "Root password cleared, set one as soon as possible!"
+		fi
 
-	maybe_exec 'after_install'
+		# If configured, change to gentoo testing at the last moment.
+		# This is to ensure a smooth installation process. You can deal
+		# with the blockers after installation ;)
+		if [[ $USE_PORTAGE_TESTING == "true" ]]; then
+			einfo "Adding ~$GENTOO_ARCH to ACCEPT_KEYWORDS"
+			echo "ACCEPT_KEYWORDS=\"~$GENTOO_ARCH\"" >> /etc/portage/make.conf \
+				|| die "Could not modify /etc/portage/make.conf"
+		fi
+
+		maybe_exec 'after_install'
+		mark_install_step_done 'post-install-configured'
+	else
+		einfo "Post-install configuration was already completed"
+	fi
 
 	einfo "Gentoo installation complete."
 	[[ $USED_LUKS == "true" ]] \
@@ -679,7 +755,21 @@ function main_install() {
 	[[ $# == 0 ]] || die "Too many arguments"
 
 	gentoo_umount
-	install_stage3
+	if install_step_done 'stage3-extracted'; then
+		einfo "Resuming from extracted stage3; mounting the existing target system"
+		mount_root
+	else
+		if ! install_step_done 'disk-configured'; then
+			prepare_installation_environment
+			apply_disk_configuration
+			mark_install_step_done 'disk-configured'
+		else
+			einfo "Disk configuration was already completed; preserving the target disk"
+		fi
+		download_stage3
+		extract_stage3
+		mark_install_step_done 'stage3-extracted'
+	fi
 
 	[[ $IS_EFI == "true" ]] \
 		&& mount_efivars
