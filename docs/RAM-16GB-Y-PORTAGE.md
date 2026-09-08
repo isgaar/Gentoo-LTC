@@ -1,28 +1,19 @@
 # Ampliación A 16 GiB De RAM Y Portage
 
-El perfil se instala de forma conservadora con 8 GiB de RAM:
-
-```bash
-PORTAGE_MAKEOPTS="-j2 -l2"
-PORTAGE_EMERGE_DEFAULT_OPTS="--jobs=1 --load-average=2 --with-bdeps=y"
-```
-
-## Memoria Durante La Instalación Desde LiveCD
-
-En el equipo de 8 GiB, el instalador activa automáticamente 4 GiB de ZRAM con
-zstd antes de particionar o compilar. Es swap temporal del LiveCD, no ocupa el
-disco destino y desaparece al reiniciar. Esto evita que el OOM killer termine
-procesos `cc1plus` de paquetes pesados como Boost. Se puede ajustar en
-`gentoo.conf` con `LIVE_ZRAM_SIZE`; mantén `PORTAGE_MAKEOPTS="-j2 -l2"`.
-
-Cuando el equipo tenga 16 GiB totales y la memoria nueva haya sido reconocida
-por el firmware y Linux, modifica estas dos líneas de `gentoo.conf` **antes de
-iniciar una instalación nueva**:
+El perfil para este equipo con 16 GiB de RAM está configurado así:
 
 ```bash
 PORTAGE_MAKEOPTS="-j6 -l6"
 PORTAGE_EMERGE_DEFAULT_OPTS="--jobs=1 --load-average=6 --with-bdeps=y"
 ```
+
+## Memoria Durante La Instalación Desde LiveCD
+
+El instalador activa automáticamente 4 GiB de ZRAM con
+zstd antes de particionar o compilar. Es swap temporal del LiveCD, no ocupa el
+disco destino y desaparece al reiniciar. Esto evita que el OOM killer termine
+procesos `cc1plus` de paquetes pesados como Boost. Se puede ajustar en
+`gentoo.conf` con `LIVE_ZRAM_SIZE`.
 
 Se mantiene `--jobs=1` intencionalmente: Portage compila un paquete pesado a la
 vez, mientras `MAKEOPTS` permite hasta seis procesos para ese paquete. Esto
@@ -38,9 +29,9 @@ free -h
 ```
 
 Si durante una compilación la memoria disponible cae demasiado, aparece swap
-intensivo o el kernel mata procesos por falta de memoria, vuelve al ajuste de
-8 GiB. No se recomienda volver directamente a `-j12` ni usar varios paquetes
-pesados en paralelo.
+intensivo o el kernel mata procesos por falta de memoria, baja a `-j4 -l4`.
+No se recomienda subir directamente a `-j12` ni usar varios paquetes pesados
+en paralelo.
 
 ## Grupos Del Usuario Normal
 

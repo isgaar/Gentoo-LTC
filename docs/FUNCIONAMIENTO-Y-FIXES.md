@@ -321,7 +321,7 @@ El esquema resultante es:
 | Partición | Uso |
 | --- | --- |
 | Primera | Sistema EFI (ESP) |
-| Segunda | Swap de 16 GiB |
+| Segunda | Swap de 20 GiB |
 | Tercera | Contenedor LUKS con la raíz Btrfs |
 
 Btrfs utiliza un único subvolumen `root` montado como `/`. El perfil no crea

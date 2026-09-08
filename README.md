@@ -21,7 +21,7 @@ Basado en el instalador de [oddlama/gentoo-install](https://github.com/oddlama/g
 | **Bluetooth** | Intel Wireless-AC 9260 Bluetooth Adapter (controlador `btusb`, `bluetooth.service`) |
 | **Impresión** | CUPS (`net-print/cups`, `cups-filters`, `kde-plasma/print-manager`, grupos `lp` y `lpadmin`) |
 | **Almacenamiento** | Detección automática de unidad NVMe interna (`TARGET_DISK="auto-nvme"`) |
-| **Particionado** | UEFI / ESP en `/boot/efi` (FAT32), Swap de 16 GiB, Root Btrfs cifrado con LUKS |
+| **Particionado** | UEFI / ESP en `/boot/efi` (FAT32), Swap de 20 GiB, Root Btrfs cifrado con LUKS |
 | **Initramfs** | Dracut persistente (`90-gentoo-hp.conf`) con módulos tempranos `nvme` y `amdgpu` |
 | **Kernel** | Compilado localmente (`sys-kernel/gentoo-kernel`) como `X.X.X-gentoo4thinkcentre-m75s` |
 | **Sonido Hi-Fi** | PipeWire + WirePlumber (tasas de 44.1–192 kHz negociadas, resampleador sinc Q10, preferencia A2DP por calidad y RTKit) |
@@ -76,9 +76,9 @@ cd Gentoo-LTC
 ### Proceso de Instalación Automatizado
 
 1. **Detección del disco:** El instalador verifica el modo UEFI y busca exactamente una unidad NVMe (`auto-nvme`). Muestra la distribución en pantalla antes de aplicar cambios.
-2. **Particionado y Cifrado:** Crea la partición EFI, 16 GiB de swap y el volumen raíz Btrfs protegido con LUKS.
+2. **Particionado y Cifrado:** Crea la partición EFI, 20 GiB de swap y el volumen raíz Btrfs protegido con LUKS.
 3. **Descarga y Extracción:** Obtiene el stage3 `amd64-systemd` más reciente validando firmas criptográficas y digest oficial.
-4. **Optimización de Portage:** Sincroniza el árbol Git firmado desde el espejo oficial, configura espejos redundantes globales (`GENTOO_MIRRORS`), compila con `-march=znver3` y limita Portage a un paquete y dos compilaciones simultáneas para los 8 GiB de RAM actuales. Finaliza con `emerge --update --deep --newuse @world` para dejar el sistema en las versiones estables actuales.
+4. **Optimización de Portage:** Sincroniza el árbol Git firmado desde el espejo oficial, configura espejos redundantes globales (`GENTOO_MIRRORS`), compila con `-march=znver3`, hasta seis procesos por paquete y un solo paquete pesado a la vez para aprovechar 16 GiB de RAM sin agotar memoria. Finaliza con `emerge --update --deep --newuse @world` para dejar el sistema en las versiones estables actuales.
 5. **Kernel y Drivers:** Aplica el fragmento persistente de hardware de red (`10-network-hardware.config`), compila `sys-kernel/gentoo-kernel` y genera el initramfs con Dracut.
 6. **Pila de Software y Servicios:** Instala KDE Plasma, MySway, PipeWire, BlueZ, CUPS, NetworkManager, libvirt/QEMU, fuentes Inter/JetBrains Mono y utilidades de sistema.
 7. **Configuración de Usuario:** Pregunta interactivamente el nombre de usuario, contraseña y privilegios de `sudo` (grupo `wheel`) antes de las compilaciones largas; la contraseña no se guarda en `gentoo.conf`. Después configura directorios personales XDG en español protegidos contra sobreescritura.
