@@ -840,17 +840,23 @@ function download_stage3() {
 
 	local STAGE3_RELEASES="$GENTOO_MIRROR/releases/$GENTOO_ARCH/autobuilds/current-$STAGE3_BASENAME_FINAL/"
 
-	# Download upstream list of files
-	CURRENT_STAGE3="$(download_stdout "$STAGE3_RELEASES")" \
-		|| die "Could not retrieve list of tarballs"
-	# Decode urlencoded strings
-	CURRENT_STAGE3=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))' <<< "$CURRENT_STAGE3")
-	# Parse output for correct filename
-	CURRENT_STAGE3="$(grep -o "\"${STAGE3_BASENAME_FINAL}-[0-9A-Z]*.tar.xz\"" <<< "$CURRENT_STAGE3" \
-		| sort -u | head -1)" \
-		|| die "Could not parse list of tarballs"
-	# Strip quotes
-	CURRENT_STAGE3="${CURRENT_STAGE3:1:-1}"
+	# Try fetching the official latest-*.txt file first
+	local latest_txt="$STAGE3_RELEASES/latest-$STAGE3_BASENAME_FINAL.txt"
+	local latest_info
+	CURRENT_STAGE3=""
+	if latest_info="$(download_stdout "$latest_txt" 2>/dev/null)" && [[ -n "$latest_info" ]]; then
+		CURRENT_STAGE3="$(awk '/^stage3-.*\.tar\.xz/ {print $1; exit}' <<< "$latest_info")"
+	fi
+
+	# Fallback to directory parsing if latest-*.txt was not present
+	if [[ -z "${CURRENT_STAGE3-}" ]]; then
+		CURRENT_STAGE3="$(download_stdout "$STAGE3_RELEASES")" \
+			|| die "Could not retrieve list of tarballs"
+		CURRENT_STAGE3=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))' <<< "$CURRENT_STAGE3")
+		CURRENT_STAGE3="$(grep -o "\"${STAGE3_BASENAME_FINAL}-[0-9A-Z]*.tar.xz\"" <<< "$CURRENT_STAGE3" \
+			| tr -d '"' | sort -V | tail -n 1)" \
+			|| die "Could not parse list of tarballs"
+	fi
 	# File to indiciate successful verification
 	CURRENT_STAGE3_VERIFIED="${CURRENT_STAGE3}.verified"
 

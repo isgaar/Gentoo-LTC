@@ -103,6 +103,12 @@ function configure_portage() {
 		[[ $SELECT_MIRRORS_LARGE_FILE == "true" ]] \
 			&& mirrorselect_params+=("-D")
 		try mirrorselect "${mirrorselect_params[@]}"
+	else
+		local dist_mirrors="${GENTOO_MIRRORS:-${GENTOO_MIRROR:-https://distfiles.gentoo.org}}"
+		[[ "$dist_mirrors" != *"distfiles.gentoo.org"* ]] && dist_mirrors="$dist_mirrors https://distfiles.gentoo.org"
+		einfo "Setting reliable Portage distfiles mirrors: $dist_mirrors"
+		printf 'GENTOO_MIRRORS=%s\n' "${dist_mirrors@Q}" >> /etc/portage/make.conf \
+			|| die "Could not write GENTOO_MIRRORS to /etc/portage/make.conf"
 	fi
 
 	if [[ $ENABLE_BINPKG == "true" ]]; then
@@ -530,7 +536,11 @@ EOF
 			|| die "Could not change permissions of '/etc/portage/repos.conf/gentoo.conf'"
 		rm -rf /var/db/repos/gentoo \
 			|| die "Could not delete obsolete rsync gentoo repository"
-		try emerge --sync
+		if ! emerge --sync; then
+			ewarn "Primary git sync failed; falling back to official GitHub mirror"
+			sed -i 's|sync-uri = .*|sync-uri = https://github.com/gentoo-mirror/gentoo.git|' /etc/portage/repos.conf/gentoo.conf
+			try emerge --sync
+		fi
 	fi
 	maybe_exec 'after_configure_portage'
 

@@ -113,11 +113,11 @@ function countdown() {
 }
 
 function download_stdout() {
-	wget --quiet --https-only --secure-protocol=PFS -O - -- "$1"
+	wget --quiet --https-only --secure-protocol=PFS --prefer-family=IPv4 --timeout=30 --tries=3 -O - -- "$1"
 }
 
 function download() {
-	wget --quiet --https-only --secure-protocol=PFS --show-progress -O "$2" -- "$1"
+	wget --quiet --https-only --secure-protocol=PFS --prefer-family=IPv4 --timeout=30 --tries=3 --show-progress -O "$2" -- "$1"
 }
 
 function get_blkid_field_by_device() {
