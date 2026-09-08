@@ -57,5 +57,8 @@ done
 
 grep -Fq 'DEBUGINFOD_IMA_CERT_PATH="${DEBUGINFOD_IMA_CERT_PATH:-}"' "$chroot_dispatcher"
 [[ "$(grep -Fc 'DEBUGINFOD_IMA_CERT_PATH="${DEBUGINFOD_IMA_CERT_PATH:-}"' "$functions")" -eq 2 ]]
+grep -Fq 'command -v chronyd' "$functions"
+grep -Fq -- "--proto '=https' --tlsv1.2" "$functions"
+grep -Fq 'Need ntpd, chronyd, or curl to synchronize time' "$functions"
 
 printf 'Resiliencia de instalación de Gentoo-HP validada correctamente.\n'

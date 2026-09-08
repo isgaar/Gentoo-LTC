@@ -9,12 +9,18 @@ function sync_time() {
 	einfo "Syncing time"
 	if command -v ntpd &> /dev/null; then
 		try ntpd -g -q
-	elif command -v chrony &> /dev/null; then
+	elif command -v chronyd &> /dev/null; then
 		# See https://github.com/oddlama/gentoo-install/pull/122
 		try chronyd -q
 	else
-		# why am I doing this?
-		try date -s "$(curl -sI http://example.com | grep -i ^date: | cut -d' ' -f3-)"
+		local remote_date
+		remote_date="$(curl -fsSI --proto '=https' --tlsv1.2 \
+			--connect-timeout 10 --max-time 30 https://www.gentoo.org \
+			| awk 'tolower($1) == "date:" { sub(/^[^:]*:[[:space:]]*/, ""); sub(/\r$/, ""); print; exit }')" \
+			|| die "Could not obtain the time from Gentoo over HTTPS"
+		[[ -n "$remote_date" ]] \
+			|| die "Gentoo HTTPS response did not contain a Date header"
+		try date -u -s "$remote_date"
 	fi
 
 	einfo "Current date: $(LANG=C date)"
@@ -84,7 +90,6 @@ function prepare_installation_environment() {
 		gpg
 		hwclock
 		lsblk
-		ntpd
 		partprobe
 		python3
 		"?rhash"
@@ -105,6 +110,15 @@ function prepare_installation_environment() {
 
 	# Check for existence of required programs
 	check_wanted_programs "${wanted_programs[@]}"
+
+	# Live environments commonly ship either ntpd or chronyd. If neither is
+	# present, HTTPS is a last-resort source of time needed to validate Gentoo's
+	# signed stage3 metadata.
+	if ! command -v ntpd > /dev/null 2>&1 \
+		&& ! command -v chronyd > /dev/null 2>&1 \
+		&& ! command -v curl > /dev/null 2>&1; then
+		die "Need ntpd, chronyd, or curl to synchronize time before downloading stage3"
+	fi
 
 	# Sync time now to prevent issues later
 	sync_time

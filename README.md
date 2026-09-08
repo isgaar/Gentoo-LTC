@@ -39,6 +39,10 @@ Basado en el instalador de [oddlama/gentoo-install](https://github.com/oddlama/g
 5. Selecciona la memoria USB en modo **UEFI**.
 6. Conéctate a internet desde el entorno gráfico o mediante terminal con `nmtui`.
 
+El instalador comprueba las herramientas del LiveGUI, sincroniza el reloj antes
+de validar el stage3 y se detiene antes de modificar el disco si falta una
+dependencia, no se arrancó en UEFI o no detecta exactamente un NVMe.
+
 ---
 
 ## Instalación Paso a Paso
