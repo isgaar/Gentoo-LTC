@@ -37,6 +37,19 @@ kernel_emerge_line="$(grep -n 'sys-kernel/dracut sys-kernel/gentoo-kernel app-ar
 grep -Fq -- '--update --newuse --autounmask-continue=y' "$installer"
 grep -Fq -- '--update --deep --newuse @world' "$installer"
 grep -Fqx 'PORTAGE_GIT_MIRROR="https://github.com/gentoo-mirror/gentoo.git"' "$profile"
+grep -Fqx 'PORTAGE_MAKEOPTS="-j2 -l2"' "$profile"
+grep -Fqx 'PORTAGE_EMERGE_DEFAULT_OPTS="--jobs=1 --load-average=2 --with-bdeps=y"' "$profile"
+for group in audio video render input plugdev netdev lp lpadmin kvm libvirt vboxusers dialout cdrom usb; do
+	grep -Fq "$group" <(sed -n '/^INSTALL_USER_GROUPS=/p' "$profile")
+done
+grep -Fq 'PORTAGE_MAKEOPTS="-j6 -l6"' "$repo_dir/docs/RAM-16GB-Y-PORTAGE.md"
+grep -Fq 'PORTAGE_EMERGE_DEFAULT_OPTS="--jobs=1 --load-average=6 --with-bdeps=y"' "$repo_dir/docs/RAM-16GB-Y-PORTAGE.md"
+
+user_creation_line="$(grep -n "maybe_exec 'ensure_install_user_exists'" "$installer" | cut -d: -f1)"
+sync_line="$(grep -n 'Syncing portage tree' "$installer" | cut -d: -f1)"
+[[ "$user_creation_line" -lt "$sync_line" ]]
+user_creation_function="$(sed -n '/^function ensure_install_user_exists()/,/^}/p' "$profile")"
+grep -Fq 'passwd "$INSTALL_USER"' <<<"$user_creation_function"
 
 after_install="$(sed -n '/^function after_install()/,/^}/p' "$profile")"
 for unit in \

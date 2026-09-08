@@ -78,10 +78,10 @@ cd Gentoo-LTC
 1. **Detección del disco:** El instalador verifica el modo UEFI y busca exactamente una unidad NVMe (`auto-nvme`). Muestra la distribución en pantalla antes de aplicar cambios.
 2. **Particionado y Cifrado:** Crea la partición EFI, 16 GiB de swap y el volumen raíz Btrfs protegido con LUKS.
 3. **Descarga y Extracción:** Obtiene el stage3 `amd64-systemd` más reciente validando firmas criptográficas y digest oficial.
-4. **Optimización de Portage:** Sincroniza el árbol Git firmado desde el espejo oficial, configura espejos redundantes globales (`GENTOO_MIRRORS`), compila con `-march=znver3` y finaliza con `emerge --update --deep --newuse @world` para dejar el sistema en las versiones estables actuales.
+4. **Optimización de Portage:** Sincroniza el árbol Git firmado desde el espejo oficial, configura espejos redundantes globales (`GENTOO_MIRRORS`), compila con `-march=znver3` y limita Portage a un paquete y dos compilaciones simultáneas para los 8 GiB de RAM actuales. Finaliza con `emerge --update --deep --newuse @world` para dejar el sistema en las versiones estables actuales.
 5. **Kernel y Drivers:** Aplica el fragmento persistente de hardware de red (`10-network-hardware.config`), compila `sys-kernel/gentoo-kernel` y genera el initramfs con Dracut.
 6. **Pila de Software y Servicios:** Instala KDE Plasma, MySway, PipeWire, BlueZ, CUPS, NetworkManager, libvirt/QEMU, fuentes Inter/JetBrains Mono y utilidades de sistema.
-7. **Configuración de Usuario:** Pregunta interactivamente el nombre de usuario, contraseña y privilegios de `sudo` (grupo `wheel`), configurando directorios personales XDG en español protegidos contra sobreescritura.
+7. **Configuración de Usuario:** Pregunta interactivamente el nombre de usuario, contraseña y privilegios de `sudo` (grupo `wheel`) antes de las compilaciones largas; la contraseña no se guarda en `gentoo.conf`. Después configura directorios personales XDG en español protegidos contra sobreescritura.
 
 ---
 
@@ -215,4 +215,5 @@ Para más información sobre la arquitectura y componentes específicos, consult
 - [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md): Perfil Orizaba, restauración, fuentes y personalización de Plasma.
 - [`docs/FLATPAK-DESKTOP-INTEGRATION.md`](docs/FLATPAK-DESKTOP-INTEGRATION.md): Integración de Discover, tema GTK Breeze y fuentes del sistema en Flatpak.
 - [`docs/VIRTUALIZATION.md`](docs/VIRTUALIZATION.md): Uso de QEMU/KVM, libvirt, Virt-Manager y VirtualBox.
+- [`docs/RAM-16GB-Y-PORTAGE.md`](docs/RAM-16GB-Y-PORTAGE.md): Ajuste seguro de Portage al ampliar la memoria a 16 GiB y grupos del usuario.
 - [`docs/FUNCIONAMIENTO-Y-FIXES.md`](docs/FUNCIONAMIENTO-Y-FIXES.md): Registro técnico de arquitectura, decisiones de diseño y fixes implementados.

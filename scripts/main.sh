@@ -483,6 +483,11 @@ function main_install_gentoo_in_chroot() {
 	passwd -d root \
 		|| die "Could not change root password"
 
+	# Ask for the normal user's password before long package builds.  This keeps
+	# the credential out of configuration files and makes the account usable if a
+	# later build must be resumed.
+	maybe_exec 'ensure_install_user_exists'
+
 	# Sync portage
 	einfo "Syncing portage tree"
 	try emerge-webrsync
