@@ -35,6 +35,8 @@ kernel_call_line="$(grep -n 'install_initramfs_dependencies' "$installer" | tail
 kernel_emerge_line="$(grep -n 'sys-kernel/dracut sys-kernel/gentoo-kernel app-arch/zstd' "$installer" | cut -d: -f1)"
 [[ "$kernel_call_line" -lt "$kernel_emerge_line" ]]
 grep -Fq -- '--update --newuse --autounmask-continue=y' "$installer"
+grep -Fq -- '--update --deep --newuse @world' "$installer"
+grep -Fqx 'PORTAGE_GIT_MIRROR="https://github.com/gentoo-mirror/gentoo.git"' "$profile"
 
 after_install="$(sed -n '/^function after_install()/,/^}/p' "$profile")"
 for unit in \

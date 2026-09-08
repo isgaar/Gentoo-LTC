@@ -74,7 +74,7 @@ cd Gentoo-LTC
 1. **Detección del disco:** El instalador verifica el modo UEFI y busca exactamente una unidad NVMe (`auto-nvme`). Muestra la distribución en pantalla antes de aplicar cambios.
 2. **Particionado y Cifrado:** Crea la partición EFI, 16 GiB de swap y el volumen raíz Btrfs protegido con LUKS.
 3. **Descarga y Extracción:** Obtiene el stage3 `amd64-systemd` más reciente validando firmas criptográficas y digest oficial.
-4. **Optimización de Portage:** Configura espejos redundantes globales (`GENTOO_MIRRORS`), compilación `-march=znver3` con 12 hilos, y repositorio git con fallback automático.
+4. **Optimización de Portage:** Sincroniza el árbol Git firmado desde el espejo oficial, configura espejos redundantes globales (`GENTOO_MIRRORS`), compila con `-march=znver3` y finaliza con `emerge --update --deep --newuse @world` para dejar el sistema en las versiones estables actuales.
 5. **Kernel y Drivers:** Aplica el fragmento persistente de hardware de red (`10-network-hardware.config`), compila `sys-kernel/gentoo-kernel` y genera el initramfs con Dracut.
 6. **Pila de Software y Servicios:** Instala KDE Plasma, MySway, PipeWire, BlueZ, CUPS, NetworkManager, libvirt/QEMU, fuentes Inter/JetBrains Mono y utilidades de sistema.
 7. **Configuración de Usuario:** Pregunta interactivamente el nombre de usuario, contraseña y privilegios de `sudo` (grupo `wheel`), configurando directorios personales XDG en español protegidos contra sobreescritura.

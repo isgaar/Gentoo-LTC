@@ -637,6 +637,13 @@ EOF
 		try emerge --verbose --update --newuse --autounmask-continue=y -- "${ADDITIONAL_PACKAGES[@]}"
 	fi
 
+	# The stage3 and the packages installed above may have pulled different
+	# dependency generations. Resolve the complete installed set against the
+	# just-synchronized tree so a fresh installation finishes on the newest
+	# stable versions available for the selected architecture and USE flags.
+	einfo "Updating the complete system to the current stable package set"
+	try emerge --verbose --update --deep --newuse @world
+
 	if ask "Do you want to assign a root password now?"; then
 		try passwd root
 		einfo "Root password assigned"
