@@ -24,7 +24,7 @@ Basado en el instalador de [oddlama/gentoo-install](https://github.com/oddlama/g
 | **Particionado** | UEFI / ESP en `/boot/efi` (FAT32), Swap de 16 GiB, Root Btrfs cifrado con LUKS |
 | **Initramfs** | Dracut persistente (`90-gentoo-hp.conf`) con módulos tempranos `nvme` y `amdgpu` |
 | **Kernel** | Compilado localmente (`sys-kernel/gentoo-kernel`) como `X.X.X-gentoo4thinkcentre-m75s` |
-| **Sonido** | PipeWire + WirePlumber con emulación ALSA/PulseAudio y RTKit |
+| **Sonido Hi-Fi** | PipeWire + WirePlumber (tasas de 44.1–192 kHz negociadas, resampleador sinc Q10, preferencia A2DP por calidad y RTKit) |
 | **Escritorios** | KDE Plasma 6 (perfil Orizaba saneado e importador idempotente) y MySway modular |
 | **Gestor de Inicio**| SDDM con sesión Wayland y menú de arranque GRUB UEFI con tema personalizado |
 
@@ -207,7 +207,7 @@ reboot
 Para más información sobre la arquitectura y componentes específicos, consulta las guías dedicadas en la carpeta `docs/`:
 
 - [`docs/KERNEL-PERSONALIZADO.md`](docs/KERNEL-PERSONALIZADO.md): Gestión del kernel Distribution Kernel y fragmentos persistentes en `/etc/kernel/config.d/`.
-- [`docs/AUDIO-Y-BLUETOOTH.md`](docs/AUDIO-Y-BLUETOOTH.md): Pila multimedia PipeWire, WirePlumber, ALSA y diagnóstico de Bluetooth.
+- [`docs/AUDIO-Y-BLUETOOTH.md`](docs/AUDIO-Y-BLUETOOTH.md): Pila multimedia de alta fidelidad, negociación de formato/tasa y Bluetooth A2DP.
 - [`docs/KDE-PERSONALIZADO.md`](docs/KDE-PERSONALIZADO.md): Perfil Orizaba, restauración, fuentes y personalización de Plasma.
 - [`docs/FLATPAK-DESKTOP-INTEGRATION.md`](docs/FLATPAK-DESKTOP-INTEGRATION.md): Integración de Discover, tema GTK Breeze y fuentes del sistema en Flatpak.
 - [`docs/VIRTUALIZATION.md`](docs/VIRTUALIZATION.md): Uso de QEMU/KVM, libvirt, Virt-Manager y VirtualBox.

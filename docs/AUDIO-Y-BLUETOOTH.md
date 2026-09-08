@@ -1,199 +1,78 @@
-# Audio Y Bluetooth En Gentoo-HP
+# Audio Y Bluetooth De Alta Fidelidad En Gentoo-LTC
 
-Esta guía documenta la pila multimedia usada por Gentoo-HP, la causa del fallo
-encontrado en la HP Pavilion 15-eh0xxx y las comprobaciones que permiten
-distinguir un problema de kernel de uno de PipeWire o BlueZ.
+Gentoo-LTC usa PipeWire, WirePlumber, ALSA y RTKit en la Lenovo ThinkCentre M75s Gen 2. La configuración favorece reproducción fiel y estable sin imponer un formato que el dispositivo de salida no haya anunciado.
 
-## Hardware Verificado
+## Hardware Del Perfil
 
-La solución se comprobó con:
+- AMD Ryzen 5 Pro 5600G / Radeon Cezanne;
+- salida analógica Realtek ALC623 mediante `snd_hda_intel`;
+- HDMI/DisplayPort AMD Radeon mediante `snd_hda_intel`;
+- coprocesador AMD ACP (`1022:15e2`);
+- Intel Wireless-AC 9260 Bluetooth.
 
-- AMD Ryzen 5 4500U;
-- codec interno Realtek ALC287;
-- controlador de micrófono AMD ACP/Renoir;
-- audio HDMI/DisplayPort de AMDGPU;
-- Intel Wireless-AC 9260 / AX200 con Bluetooth;
-- kernel `6.18.39-gentoo-dist`;
-- PipeWire 1.6.7;
-- WirePlumber 0.5.15;
-- BlueZ 5.86.
+El kernel instala los controladores HDA Realtek, HDA HDMI y ACP en `contrib/kernel/config.d/15-audio-hardware.config`. No supone que una salida HDMI concreta ni el códec analógico soporten la misma tasa máxima: ALSA negocia las capacidades reales al abrir cada dispositivo.
 
-El kernel detectaba correctamente las tarjetas ALSA y el adaptador `hci0`. Los
-fallos estaban en la configuración de espacio de usuario.
+## Política Hi-Fi
 
-## Causa Del Audio Sin Salida
+`contrib/pipewire/pipewire.conf.d/10-gentoo-ltc-hifi.conf` permite al grafo de PipeWire usar 44.1, 48, 88.2, 96, 176.4 o 192 kHz, conservando 48 kHz como predeterminado. PipeWire solo cambia la tasa del grafo cuando los dispositivos están inactivos; ésta es una limitación deliberada para no interrumpir una reproducción activa.
 
-PipeWire estaba compilado con soporte Bluetooth, pero sin:
+Cuando una sola aplicación, el grafo y el dispositivo negocian la misma tasa, no hay remuestreo en esa ruta. Con varios streams de distintas tasas, o con un dispositivo que no admita la tasa solicitada, habrá remuestreo: por ello no se promete una reproducción *bit-perfect* global.
 
-```text
-sound-server
-pipewire-alsa
-```
+Los clientes nativos, ALSA y PulseAudio compatible usan `resample.quality = 10` si deben remuestrear. Es un ajuste de calidad alta que consume más CPU y puede añadir latencia; no convierte una fuente de 16 bits o con pérdida en audio de mayor resolución. PipeWire procesa internamente el grafo en coma flotante; forzar `S32LE` al DAC no aumenta por sí solo la fidelidad, así que se deja que ALSA elija el formato nativo del dispositivo.
 
-Sin `sound-server`, el ebuild de Gentoo no instalaba el fragmento que activa
-`hardware.audio` y `hardware.bluetooth` en el perfil principal de WirePlumber.
-Por eso `wpctl status` solo mostraba:
+Tampoco se desactiva la suspensión de nodos. Si se perciben clics al reanudar audio, se puede ajustar de forma localizada tras identificar el nodo con `wpctl status`, sin mantener encendidos permanentemente HDMI y el códec interno.
+
+## Bluetooth
+
+`20-gentoo-ltc-hifi-bluetooth.conf` selecciona la preferencia de perfil A2DP por calidad. No fija una lista de códecs ni LDAC a 990 kb/s: PipeWire anuncia solo los códecs compilados localmente y compatibles con el auricular, conserva los valores de compatibilidad de su versión y puede adaptarse a interferencias.
+
+Si están disponibles en la compilación y en el auricular, PipeWire puede usar SBC-XQ, AAC, LDAC, aptX o aptX HD. Todos los códecs Bluetooth A2DP son con pérdida; para una ruta sin pérdida usa la salida analógica/HDMI o un DAC USB. Los perfiles HFP/HSP destinados a llamadas tienen menor calidad que A2DP.
+
+## Paquetes Y USE Flags
+
+El perfil instala PipeWire, WirePlumber, RTKit, ALSA UCM, Plasma PA, BlueZ y Bluedevil. Para PipeWire habilita:
 
 ```text
-Dummy Output
-```
-
-ALSA sí detectaba el ALC287, pero las aplicaciones heredadas tampoco podían
-entrar al grafo de PipeWire porque faltaba `pipewire-alsa`.
-
-## Solución De Audio
-
-El perfil instala explícitamente:
-
-```text
-media-libs/alsa-ucm-conf
-media-sound/alsa-utils
-media-video/pipewire
-media-video/wireplumber
-sys-auth/rtkit
-kde-plasma/plasma-pa
-```
-
-Y aplica:
-
-```text
-media-video/pipewire bluetooth dbus pipewire-alsa sound-server systemd
-sys-auth/rtkit systemd
-```
-
-`alsa-ucm-conf` aporta las rutas y perfiles del hardware. WirePlumber selecciona
-el perfil y el puerto apropiados, mientras RTKit permite solicitar prioridad de
-tiempo real mediante D-Bus para reducir cortes y variaciones de latencia.
-`plasma-pa` añade el control de volumen y perfiles en KDE Plasma.
-
-El archivo:
-
-```text
-/etc/wireplumber/wireplumber.conf.d/10-gentoo-hp-audio-bluetooth.conf
-```
-
-activa explícitamente:
-
-```text
-hardware.audio
-hardware.bluetooth
-```
-
-No se fuerza el hardware a 96 kHz. PipeWire y WirePlumber conservan 48 kHz como
-valor estable para el dispositivo y pueden negociar los formatos compatibles.
-Forzar una frecuencia superior no mejora una fuente de menor resolución y
-puede aumentar consumo o incompatibilidades.
-
-## Causa De Bluetooth Sin Dispositivos
-
-El módulo `btusb`, el firmware Intel y `hci0` estaban cargados, sin bloqueo
-físico ni bloqueo por RFKill. El problema era:
-
-```text
-bluetooth.service: disabled, inactive
-```
-
-Sin `bluetoothd`, Bluedevil y `bluetoothctl` no tienen un servicio BlueZ al que
-consultar y no pueden descubrir ni emparejar dispositivos.
-
-## Solución De Bluetooth
-
-El perfil instala explícitamente:
-
-```text
-net-wireless/bluez
-kde-plasma/bluedevil
-```
-
-BlueZ se compila con `obex`, `readline`, `systemd` y `udev`. Al terminar la
-instalación se habilita:
-
-```bash
-systemctl enable bluetooth.service
-```
-
-`AutoEnable` vale `true` de forma predeterminada en BlueZ, por lo que el
-controlador se enciende cuando aparece. WirePlumber utiliza todos los codecs
-Bluetooth disponibles por defecto y negocia automáticamente A2DP o el perfil de
-llamadas apropiado. El build de PipeWire para este perfil incluye, cuando las
-dependencias del ebuild están disponibles, SBC/SBC-XQ, AAC, aptX, LDAC, LC3 y
-Opus.
-
-## Servicios De Usuario
-
-Para todos los usuarios nuevos se habilitan globalmente:
-
-```text
-pipewire.socket
-pipewire-pulse.socket
-wireplumber.service
-```
-
-`pipewire-pulse` ofrece compatibilidad con aplicaciones que utilizan el
-protocolo de PulseAudio; no instala ni ejecuta el daemon PulseAudio tradicional.
-
-## Comprobaciones
-
-Audio:
-
-```bash
-wpctl status
-speaker-test -c 2 -t wav -l 1
-```
-
-La salida esperada debe incluir el altavoz interno como sink predeterminado y la
-prueba debe completar `Front Left` y `Front Right`.
-
-Servicios:
-
-```bash
-systemctl --user status pipewire pipewire-pulse wireplumber
-systemctl status bluetooth
-```
-
-Bluetooth:
-
-```bash
-rfkill list
-bluetoothctl show
-bluetoothctl scan on
-```
-
-El controlador debe indicar `Powered: yes`, `Pairable: yes` y cambiar
-temporalmente a `Discovering: yes`.
-
-## Reparación De Una Instalación Existente
-
-Configura Portage:
-
-```text
-# /etc/portage/package.use/gentoo-hp-audio-bluetooth
-media-video/pipewire bluetooth dbus pipewire-alsa sound-server systemd
+media-video/pipewire bluetooth dbus extra ffmpeg flatpak liblc3 pipewire-alsa sound-server systemd
 net-wireless/bluez obex readline systemd udev
 sys-auth/rtkit systemd
 ```
 
-Instala o reconstruye la pila:
+`sound-server` instala PipeWire PulseAudio y la integración de hardware de WirePlumber; `pipewire-alsa` atiende aplicaciones ALSA sin daemon PulseAudio tradicional. `extra` incorpora utilidades de diagnóstico como `pw-play`; los códecs efectivos se comprueban en el sistema instalado.
+
+## Verificación
+
+Comprueba los dispositivos y el servicio de usuario:
 
 ```bash
-sudo emerge --ask --verbose --newuse \
-    media-video/pipewire media-video/wireplumber \
-    sys-auth/rtkit kde-plasma/plasma-pa \
-    net-wireless/bluez kde-plasma/bluedevil
+wpctl status
+systemctl --user status pipewire pipewire-pulse wireplumber
 ```
 
-Habilita Bluetooth:
+Durante una reproducción, `pw-top` muestra la tasa activa del grafo. Para comprobar qué eligió ALSA para una salida concreta, identifica primero la tarjeta y el PCM con `aplay -l`, y después consulta su `hw_params`; por ejemplo:
 
 ```bash
-sudo systemctl enable --now bluetooth.service
+cat /proc/asound/card1/pcm0p/sub0/hw_params
 ```
 
-Después cierra y vuelve a abrir la sesión gráfica, o reinicia los servicios del
-usuario:
+Verifica los códecs Bluetooth negociados y el estado del adaptador con:
 
 ```bash
-systemctl --user restart pipewire pipewire-pulse wireplumber
+wpctl status
+bluetoothctl show
+rfkill list
 ```
 
-No ejecutes `sudo systemctl --user`: los servicios multimedia pertenecen al
-usuario de la sesión, no a `root`.
+`bluetooth.service` es un servicio de sistema. PipeWire, PipeWire Pulse y WirePlumber pertenecen a la sesión gráfica del usuario: no los reinicies con `sudo systemctl --user`.
+
+## Aplicar A Una Instalación Existente
+
+Tras actualizar el repositorio, ejecuta de nuevo el configurador o instala los fragmentos y reinicia la sesión gráfica. Para activar cambios de USE flags:
+
+```bash
+sudo emerge --ask --newuse --changed-use \
+  media-video/pipewire media-video/wireplumber sys-auth/rtkit \
+  net-wireless/bluez
+```
+
+Para aplicar el fragmento de kernel, cópialo junto con los demás fragmentos y recompila `sys-kernel/gentoo-kernel`; consulta [`KERNEL-PERSONALIZADO.md`](KERNEL-PERSONALIZADO.md) para el procedimiento.

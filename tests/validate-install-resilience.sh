@@ -15,6 +15,13 @@ grep -Fqx 'media-libs/libcanberra alsa' "$profile"
 grep -Fqx 'media-libs/freetype harfbuzz' "$profile"
 grep -Fqx 'media-libs/libsdl2 gles2' "$profile"
 grep -Fqx 'sys-apps/systemd policykit' "$profile"
+grep -Fqx 'media-video/pipewire bluetooth dbus extra ffmpeg flatpak liblc3 pipewire-alsa sound-server systemd' "$profile"
+grep -Fq 'contrib/kernel/config.d/15-audio-hardware.config' "$repo_dir/docs/KERNEL-PERSONALIZADO.md"
+grep -Fq 'default.clock.allowed-rates = [ 44100 48000 88200 96000 176400 192000 ]' \
+	"$repo_dir/contrib/pipewire/pipewire.conf.d/10-gentoo-ltc-hifi.conf"
+grep -Fq 'bluetooth.profile-preference = "quality"' \
+	"$repo_dir/contrib/wireplumber/20-gentoo-ltc-hifi-bluetooth.conf"
+[[ ! -e "$repo_dir/contrib/wireplumber/15-gentoo-ltc-hifi-alsa.conf" ]]
 
 dependency_function="$(sed -n '/^function install_initramfs_dependencies()/,/^}/p' "$installer")"
 grep -Fq 'sys-kernel/linux-firmware' <<<"$dependency_function"

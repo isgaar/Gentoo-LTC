@@ -26,6 +26,7 @@ El repositorio incluye fragmentos en:
 
 ```text
 contrib/kernel/config.d/10-network-hardware.config
+contrib/kernel/config.d/15-audio-hardware.config
 contrib/kernel/config.d/99-gentoo-ltc-localversion.config
 ```
 
