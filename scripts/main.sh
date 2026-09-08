@@ -755,6 +755,9 @@ function main_install() {
 	[[ $# == 0 ]] || die "Too many arguments"
 
 	gentoo_umount
+	# A resumed installation may skip prepare_installation_environment, but the
+	# newly booted LiveCD still needs its temporary swap before entering chroot.
+	configure_live_zram_swap
 	if install_step_done 'stage3-extracted'; then
 		einfo "Resuming from extracted stage3; mounting the existing target system"
 		mount_root

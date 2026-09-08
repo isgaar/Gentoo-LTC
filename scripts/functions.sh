@@ -107,6 +107,9 @@ function prepare_installation_environment() {
 		&& wanted_programs+=(mdadm)
 	[[ $USED_LUKS == "true" ]] \
 		&& wanted_programs+=(cryptsetup)
+	if [[ ${LIVE_ZRAM_ENABLED:-false} == "true" ]]; then
+		wanted_programs+=(mkswap swapon zramctl)
+	fi
 
 	# Check for existence of required programs
 	check_wanted_programs "${wanted_programs[@]}"
@@ -123,7 +126,45 @@ function prepare_installation_environment() {
 	# Sync time now to prevent issues later
 	sync_time
 
+	# The LiveCD itself needs swap while Portage compiles the target system.
+	# This happens before any disk operation, and is intentionally ephemeral:
+	# it is neither a swapfile on the target nor an installed-system setting.
+	configure_live_zram_swap
+
 	maybe_exec 'after_prepare_environment'
+}
+
+function configure_live_zram_swap() {
+	[[ ${LIVE_ZRAM_ENABLED:-false} == "true" ]] || return 0
+
+	local zram_device
+	local zram_size="${LIVE_ZRAM_SIZE:-4G}"
+	local zram_algorithm="${LIVE_ZRAM_ALGORITHM:-zstd}"
+	local zram_priority="${LIVE_ZRAM_PRIORITY:-100}"
+	command -v zramctl > /dev/null 2>&1 \
+		&& command -v mkswap > /dev/null 2>&1 \
+		&& command -v swapon > /dev/null 2>&1 \
+		|| die "Cannot enable LiveCD ZRAM: zramctl, mkswap, or swapon is unavailable"
+	if swapon --noheadings --raw --show=NAME | grep -Eq '^/dev/zram[0-9]+$'; then
+		einfo "LiveCD ZRAM swap is already active"
+		return 0
+	fi
+
+	command -v modprobe > /dev/null 2>&1 \
+		|| die "Cannot enable LiveCD ZRAM: modprobe is unavailable"
+	modprobe zram \
+		|| die "Could not load the LiveCD zram module"
+
+	einfo "Creating ${zram_size} of compressed ZRAM swap in the LiveCD"
+	zram_device="$(zramctl --find --size "$zram_size" --algorithm "$zram_algorithm")" \
+		|| die "Could not create LiveCD ZRAM device"
+	[[ -b "$zram_device" ]] \
+		|| die "zramctl returned an invalid device: '$zram_device'"
+	mkswap "$zram_device" > /dev/null \
+		|| die "Could not format LiveCD ZRAM swap"
+	swapon --priority "$zram_priority" "$zram_device" \
+		|| die "Could not activate LiveCD ZRAM swap"
+	einfo "LiveCD ZRAM swap active on $zram_device"
 }
 
 function check_encryption_key() {

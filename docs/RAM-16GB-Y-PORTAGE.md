@@ -7,6 +7,14 @@ PORTAGE_MAKEOPTS="-j2 -l2"
 PORTAGE_EMERGE_DEFAULT_OPTS="--jobs=1 --load-average=2 --with-bdeps=y"
 ```
 
+## Memoria Durante La Instalación Desde LiveCD
+
+En el equipo de 8 GiB, el instalador activa automáticamente 4 GiB de ZRAM con
+zstd antes de particionar o compilar. Es swap temporal del LiveCD, no ocupa el
+disco destino y desaparece al reiniciar. Esto evita que el OOM killer termine
+procesos `cc1plus` de paquetes pesados como Boost. Se puede ajustar en
+`gentoo.conf` con `LIVE_ZRAM_SIZE`; mantén `PORTAGE_MAKEOPTS="-j2 -l2"`.
+
 Cuando el equipo tenga 16 GiB totales y la memoria nueva haya sido reconocida
 por el firmware y Linux, modifica estas dos líneas de `gentoo.conf` **antes de
 iniciar una instalación nueva**:
