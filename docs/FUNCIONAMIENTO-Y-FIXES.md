@@ -1,6 +1,6 @@
 # Funcionamiento Y Registro De Fixes
 
-Este documento describe cómo funciona el perfil Gentoo-HP, qué problemas
+Este documento describe cómo funciona el perfil Gentoo-LTC, qué problemas
 resuelven los fixes incorporados y cómo auditar su historial.
 
 La configuración y el diagnóstico de PipeWire, WirePlumber y BlueZ se
@@ -369,13 +369,13 @@ perfil.
 Antes de compilar `sys-kernel/gentoo-kernel`, el perfil instala:
 
 ```text
-/etc/kernel/config.d/99-gentoo-hp-localversion.config
+/etc/kernel/config.d/99-gentoo-ltc-localversion.config
 ```
 
 con:
 
 ```text
-CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"
+CONFIG_LOCALVERSION="-gentoo4thinkcentre-m75s"
 # CONFIG_LOCALVERSION_AUTO is not set
 ```
 
@@ -384,7 +384,7 @@ El ebuild propone primero `CONFIG_LOCALVERSION="-gentoo-dist"`, pero
 final. El valor del perfil lo sustituye y produce:
 
 ```text
-X.X.X-gentoo4hp-pavilion-15
+X.X.X-gentoo4thinkcentre-m75s
 ```
 
 La version completa se utiliza de forma coherente en `/usr/src/linux-*`,
@@ -690,7 +690,7 @@ La autenticación con GitHub tampoco forma parte del sistema instalado:
 | `contrib/kde/orizaba/first_login.sh` | Aplicador idempotente del layout y fondo dentro de una sesión Plasma |
 | `tests/validate-kde-profile.sh` | Integridad exacta, fuentes, exclusiones, enlaces, primer inicio e importación en un HOME temporal |
 | `contrib/dracut/90-gentoo-hp.conf` | Configuración persistente del initramfs |
-| `contrib/kernel/config.d/99-gentoo-hp-localversion.config` | Nombre persistente del kernel compilado |
+| `contrib/kernel/config.d/99-gentoo-ltc-localversion.config` | Nombre persistente del kernel compilado |
 | `contrib/bin/gentoo-hp-update-boot` | Sincronización segura del kernel y el initramfs con el ESP |
 | `contrib/kernel/postinst.d/95-gentoo-hp-esp.install` | Hook compatible con systemd kernel-install e installkernel tradicional |
 | `contrib/screenshot.png` | Captura demostrativa de KDE Plasma y Fastfetch |
@@ -727,15 +727,15 @@ node --check \
     contrib/kde/orizaba/snapshot/Orizaba/contents/layouts/org.kde.plasma.desktop-layout.js
 test "$(find contrib/fonts/inter -maxdepth 1 -type f \
     -name 'Inter*.ttf' | wc -l)" -eq 36
-grep -Fx 'CONFIG_LOCALVERSION="-gentoo4hp-pavilion-15"' \
-    contrib/kernel/config.d/99-gentoo-hp-localversion.config
+grep -Fx 'CONFIG_LOCALVERSION="-gentoo4thinkcentre-m75s"' \
+    contrib/kernel/config.d/99-gentoo-ltc-localversion.config
 grep -Fx '# CONFIG_LOCALVERSION_AUTO is not set' \
-    contrib/kernel/config.d/99-gentoo-hp-localversion.config
+    contrib/kernel/config.d/99-gentoo-ltc-localversion.config
 ```
 
 También se verificó que `contrib/screenshot.png` es un PNG válido de
 1920 × 1080 y que el calculo oficial de `scripts/setlocalversion`, usando el
-valor fusionado, produce `6.18.39-gentoo4hp-pavilion-15`.
+valor fusionado, produce `6.18.39-gentoo4thinkcentre-m75s`.
 
 El perfil MySway se comprobó además con el parser de Sway 1.11 dentro de una
 sesión real. La prueba funcional cambió del escritorio 1 al 2 y regresó al 1

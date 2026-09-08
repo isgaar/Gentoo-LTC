@@ -22,6 +22,9 @@ grep -Fq 'default.clock.allowed-rates = [ 44100 48000 88200 96000 176400 192000 
 grep -Fq 'bluetooth.profile-preference = "quality"' \
 	"$repo_dir/contrib/wireplumber/20-gentoo-ltc-hifi-bluetooth.conf"
 [[ ! -e "$repo_dir/contrib/wireplumber/15-gentoo-ltc-hifi-alsa.conf" ]]
+[[ ! -e "$repo_dir/contrib/kernel/config.d/99-gentoo-hp-localversion.config" ]]
+grep -Fqx 'CONFIG_LOCALVERSION="-gentoo4thinkcentre-m75s"' \
+	"$repo_dir/contrib/kernel/config.d/99-gentoo-ltc-localversion.config"
 
 dependency_function="$(sed -n '/^function install_initramfs_dependencies()/,/^}/p' "$installer")"
 grep -Fq 'sys-kernel/linux-firmware' <<<"$dependency_function"
