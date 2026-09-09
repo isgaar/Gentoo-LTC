@@ -60,6 +60,11 @@ grep -Fq 'INSTALL_ROOT_PASSWORD_FROM_USER' "$profile"
 grep -Fq 'chpasswd' "$profile"
 grep -Fq 'command -v visudo' "$profile"
 
+grub_function="$(sed -n '/^function configure_grub_bootloader()/,/^}/p' "$profile")"
+grep -Fq 'cp -r --no-preserve=mode,ownership' <<<"$grub_function"
+! grep -Fq 'cp -a "$GRUB_THEME_SOURCE/."' <<<"$grub_function"
+! grep -Fq 'chown -R root:root "$grub_theme_dir"' <<<"$grub_function"
+
 grep -Fq 'GENTOO_INSTALL_RESUME_FILE_NAME' "$repo_dir/install"
 grep -Fq "function install_step_done()" "$installer"
 grep -Fq "mark_install_step_done 'stage3-extracted'" "$installer"
